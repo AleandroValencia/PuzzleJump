@@ -29,6 +29,18 @@ public class Node : MonoBehaviour {
         return nodeLink[(int)_dir];
     }
 
+    public void Deactivate()
+    {
+        activeAtStart = false;
+        gameObject.SetActive(false);
+    }
+
+    public void Activate()
+    {
+        activeAtStart = true;
+        gameObject.SetActive(true);
+    }
+
     private void Awake()
     {
         if (gameObject.activeSelf)

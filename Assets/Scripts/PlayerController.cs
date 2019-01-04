@@ -13,9 +13,19 @@ public class PlayerController : MonoBehaviour
     NODE_DIRECTION lastDirection = NODE_DIRECTION.MAX_DIRECTION;
     public int startingStones = 0;
     public int remainingStones = 0;
+    public int levelIndex = 0;
 
     private Vector2 touchOrigin = -Vector2.one; //Used to store location of screen touch origin for mobile controls.
 
+    int[,] levels = new int[,] { {2,0,0, 0, 0,1, 1, 1, 1, 0,1, 0, 0, 1, 0,1, 1, 1, 1, 0,0, 1, 0, 0, 0,0,0,0,0,0},
+                                    {0,1,1,0,0,1,1,0,2,0,1,1,0,0,0,1,1,0,0,0,1,0,1,0,0,0,0,0,0,0 },
+                                    {0,2,0,0,0,0,1,1,1,0,1,0,0,1,0,1,0,0,1,0,0,1,1,1,0,0,1,0,0,0 },
+                                    {0,0,0,2,0,0,1,1,1,0,0,1,1,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0},
+                                    {0,1,1,0,0,1,0,0,1,0,1,0,0,1,0,1,1,1,1,2,1,0,0,0,0,0,0,0,0,0 },
+                                    {0,1,1,1,0,0,1,1,1,0,1,1,0,1,2,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0},
+                                    {2,0,0,0,0,1,1,1,1,0,1,0,0,1,0,1,0,0,1,0,1,1,1,1,1,0,0,0,0,0 },
+                                    {0,1,1,1,0,0,1,0,1,0,2,1,0,1,1,0,1,0,1,0,0,1,1,1,0,0,0,0,0,0},
+                                    {2,0,0,0,0,1,1,0,0,0,1,1,1,0,0,1,1,1,0,0,1,1,0,0,0,1,0,0,0,0 } };
 
     void SetupNodes()
     {
@@ -108,11 +118,33 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    void SelectLevel(int _index)
+    {
+        for(int i = 0;i < 30; ++i)
+        {
+            if(levels[_index, i] == 0)
+            {
+                nodes[i].Deactivate();
+            }
+            else if (levels[_index, i] == 1)
+            {
+                nodes[i].Activate();
+            }
+            else if(levels[_index, i] == 2)
+            {
+                nodes[i].Activate();
+                startNode = nodes[i];
+                currentNode = startNode;
+            }
+        }
+    }
+
     // Use this for initialization
     void Start()
     {
+        SelectLevel(levelIndex);
         SetupNodes();
-        startNode = currentNode;
+        transform.SetPositionAndRotation(startNode.transform.position, transform.rotation);
     }
 
     // Update is called once per frame
@@ -184,6 +216,9 @@ public class PlayerController : MonoBehaviour
         if (remainingStones == 1)
         {
             print("you win");
+            levelIndex++;
+            SelectLevel(levelIndex);
+            RestartLevel();
         }
     }
 }
