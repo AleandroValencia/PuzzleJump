@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-
     [SerializeField] int gridWidth = 5;
     [SerializeField] int gridHeight = 6;
     [SerializeField] Node[] nodes;
@@ -15,22 +14,28 @@ public class PlayerController : MonoBehaviour
     public int remainingStones = 0;
     public int levelIndex = 0;
 
+    [SerializeField] float flickAmount = 1.0f;
+    [SerializeField] float holdToRestartLength = 1.5f;
+    bool touchHold = false;
+    float touchTimer = 0.0f;
+
     private Vector2 touchOrigin = -Vector2.one; //Used to store location of screen touch origin for mobile controls.
 
-    int[,] levels = new int[,] { {2,0,0, 0, 0,1, 1, 1, 1, 0,1, 0, 0, 1, 0,1, 1, 1, 1, 0,0, 1, 0, 0, 0,0,0,0,0,0},
+    int[,] levels = new int[,] {    {2,0,0,0,0,1,1,1,1,0,1,0,0,1,0,1,1,1,1,0,0,1,0,0,0,0,0,0,0,0 },
                                     {0,1,1,0,0,1,1,0,2,0,1,1,0,0,0,1,1,0,0,0,1,0,1,0,0,0,0,0,0,0 },
                                     {0,2,0,0,0,0,1,1,1,0,1,0,0,1,0,1,0,0,1,0,0,1,1,1,0,0,1,0,0,0 },
-                                    {0,0,0,2,0,0,1,1,1,0,0,1,1,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0},
+                                    {0,0,0,2,0,0,1,1,1,0,0,1,1,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0 },
                                     {0,1,1,0,0,1,0,0,1,0,1,0,0,1,0,1,1,1,1,2,1,0,0,0,0,0,0,0,0,0 },
-                                    {0,1,1,1,0,0,1,1,1,0,1,1,0,1,2,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0},
+                                    {0,1,1,1,0,0,1,1,1,0,1,1,0,1,2,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0 },
                                     {2,0,0,0,0,1,1,1,1,0,1,0,0,1,0,1,0,0,1,0,1,1,1,1,1,0,0,0,0,0 },
-                                    {0,1,1,1,0,0,1,0,1,0,2,1,0,1,1,0,1,0,1,0,0,1,1,1,0,0,0,0,0,0},
+                                    {0,1,1,1,0,0,1,0,1,0,2,1,0,1,1,0,1,0,1,0,0,1,1,1,0,0,0,0,0,0 },
                                     {2,0,0,0,0,1,1,0,0,0,1,1,1,0,0,1,1,1,0,0,1,1,0,0,0,1,0,0,0,0 } };
 
     void SetupNodes()
     {
         startingStones = 0;
         remainingStones = 0;
+        // TODO: OPTIMIZE
         for (int i = 0; i < nodes.Length; ++i)
         {
             if (nodes[i].StartedActive())
@@ -139,16 +144,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // Use this for initialization
-    void Start()
-    {
-        SelectLevel(levelIndex);
-        SetupNodes();
-        transform.SetPositionAndRotation(startNode.transform.position, transform.rotation);
-    }
-
-    // Update is called once per frame
-    void Update()
+    void KeyboardInput()
     {
         if (Input.GetKeyDown(KeyCode.UpArrow) && lastDirection != NODE_DIRECTION.DOWN)
         {
@@ -166,12 +162,14 @@ public class PlayerController : MonoBehaviour
         {
             Jump(NODE_DIRECTION.RIGHT);
         }
-
         if (Input.GetKeyDown(KeyCode.Space))
         {
             RestartLevel();
         }
+    }
 
+    void TouchInput()
+    {
         if (Input.touchCount > 0)
         {
             Touch myTouch = Input.touches[0];
@@ -179,6 +177,9 @@ public class PlayerController : MonoBehaviour
             if (myTouch.phase == TouchPhase.Began)
             {
                 touchOrigin = myTouch.position;
+                GetComponent<SpriteRenderer>().color = Color.blue;
+                touchHold = true;
+                touchTimer = 0.0f;
             }
             else if (myTouch.phase == TouchPhase.Ended && touchOrigin.x >= 0)
             {
@@ -186,32 +187,63 @@ public class PlayerController : MonoBehaviour
                 float x = touchEnd.x - touchOrigin.x;
                 float y = touchEnd.y - touchOrigin.y;
                 touchOrigin.x = -1;
+                GetComponent<SpriteRenderer>().color = Color.red;
+                touchHold = false;
 
                 //Check if the difference along the x axis is greater than the difference along the y axis.
                 if (Mathf.Abs(x) > Mathf.Abs(y))
                 {
-                    if (x > 0 && lastDirection != NODE_DIRECTION.LEFT)
+                    if (x > flickAmount && lastDirection != NODE_DIRECTION.LEFT)
                     {
+                        GetComponent<SpriteRenderer>().color = Color.black;
                         Jump(NODE_DIRECTION.RIGHT);
                     }
-                    else if (x < 0 && lastDirection != NODE_DIRECTION.RIGHT)
+                    else if (x < -flickAmount && lastDirection != NODE_DIRECTION.RIGHT)
                     {
+                        GetComponent<SpriteRenderer>().color = Color.green;
                         Jump(NODE_DIRECTION.LEFT);
                     }
                 }
                 else
                 {
-                    if (y > 0 && lastDirection != NODE_DIRECTION.DOWN)
+                    if (y > flickAmount && lastDirection != NODE_DIRECTION.DOWN)
                     {
-                        Jump(NODE_DIRECTION.RIGHT);
+                        GetComponent<SpriteRenderer>().color = Color.yellow;
+                        Jump(NODE_DIRECTION.UP);
                     }
-                    else if (y < 0 && lastDirection != NODE_DIRECTION.UP)
+                    else if (y < -flickAmount && lastDirection != NODE_DIRECTION.UP)
                     {
-                        Jump(NODE_DIRECTION.LEFT);
+                        GetComponent<SpriteRenderer>().color = Color.white;
+                        Jump(NODE_DIRECTION.DOWN);
                     }
                 }
             }
         }
+        if (touchHold)
+        {
+            touchTimer += Time.deltaTime;
+        }
+
+        if (touchTimer > holdToRestartLength)
+        {
+            RestartLevel();
+            touchTimer = 0.0f;
+        }
+    }
+
+    // Use this for initialization
+    void Start()
+    {
+        SelectLevel(levelIndex);
+        SetupNodes();
+        transform.SetPositionAndRotation(startNode.transform.position, transform.rotation);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        KeyboardInput();
+        TouchInput();
 
         if (remainingStones == 1)
         {
