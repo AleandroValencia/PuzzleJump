@@ -10,7 +10,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Node currentNode;
     Node startNode;
     NODE_DIRECTION lastDirection = NODE_DIRECTION.MAX_DIRECTION;
-    public int startingStones = 0;
+    public int numStartingStones = 0;
     public int remainingStones = 0;
     public int levelIndex = 0;
 
@@ -18,6 +18,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float holdToRestartLength = 1.5f;
     bool touchHold = false;
     float touchTimer = 0.0f;
+
+    [SerializeField] int randomLevelGeneratorPercentage = 33;
 
     private Vector2 touchOrigin = -Vector2.one; //Used to store location of screen touch origin for mobile controls.
 
@@ -33,7 +35,7 @@ public class PlayerController : MonoBehaviour
 
     void SetupNodes()
     {
-        startingStones = 0;
+        numStartingStones = 0;
         remainingStones = 0;
         // TODO: OPTIMIZE
         for (int i = 0; i < nodes.Length; ++i)
@@ -77,7 +79,7 @@ public class PlayerController : MonoBehaviour
                     }
                 }
                 remainingStones++;
-                startingStones++;
+                numStartingStones++;
             }
         }
     }
@@ -97,37 +99,39 @@ public class PlayerController : MonoBehaviour
         lastDirection = NODE_DIRECTION.MAX_DIRECTION;
     }
 
-    void AdjustLink()
+    void AdjustLink(Node _node)
     {
         // Link the nodes to the up with the down of current node  (and left and right)
         for (int i = 0; i < 4; i += 2)
         {
-            if (currentNode.GetLink((NODE_DIRECTION)i) != null)
-                currentNode.GetLink((NODE_DIRECTION)i).SetLink((NODE_DIRECTION)i + 1, currentNode.GetLink((NODE_DIRECTION)i + 1));
-            if (currentNode.GetLink((NODE_DIRECTION)i + 1) != null)
-                currentNode.GetLink((NODE_DIRECTION)i + 1).SetLink((NODE_DIRECTION)i, currentNode.GetLink((NODE_DIRECTION)i));
+            if (_node.GetLink((NODE_DIRECTION)i) != null)
+                _node.GetLink((NODE_DIRECTION)i).SetLink((NODE_DIRECTION)i + 1, _node.GetLink((NODE_DIRECTION)i + 1));
+            if (_node.GetLink((NODE_DIRECTION)i + 1) != null)
+                _node.GetLink((NODE_DIRECTION)i + 1).SetLink((NODE_DIRECTION)i, _node.GetLink((NODE_DIRECTION)i));
         }
     }
 
-    void Jump(NODE_DIRECTION _dir)
+    bool Jump(NODE_DIRECTION _dir)
     {
         if (currentNode.GetLink(_dir) != null && currentNode.GetLink(_dir).gameObject.activeSelf)
         {
-            AdjustLink();
+            AdjustLink(currentNode);
             Node previousNode = currentNode;
             currentNode = currentNode.GetLink(_dir);
             transform.SetPositionAndRotation(currentNode.transform.position, transform.rotation);
             previousNode.gameObject.SetActive(false);
             lastDirection = _dir;
             remainingStones--;
+            return true;
         }
+        return false;
     }
 
     void SelectLevel(int _index)
     {
-        for(int i = 0;i < 30; ++i)
+        for (int i = 0; i < 30; ++i)
         {
-            if(levels[_index, i] == 0)
+            if (levels[_index, i] == 0)
             {
                 nodes[i].Deactivate();
             }
@@ -135,13 +139,65 @@ public class PlayerController : MonoBehaviour
             {
                 nodes[i].Activate();
             }
-            else if(levels[_index, i] == 2)
+            else if (levels[_index, i] == 2)
             {
                 nodes[i].Activate();
                 startNode = nodes[i];
                 currentNode = startNode;
             }
         }
+    }
+
+    void GenerateRandomLevel()
+    {
+        startNode = nodes[Random.Range(0, nodes.Length)];
+        foreach (Node node in nodes)
+        {
+            node.Activate();
+        }
+        SetupNodes();
+        foreach(Node node in nodes)
+        {
+            // Turn off random stones
+            if (Random.Range(0, 100) < randomLevelGeneratorPercentage && node != startNode)
+            {
+                AdjustLink(node);
+                node.Deactivate();
+            }            
+        }
+
+        List<Node> newLevel = new List<Node>();
+        currentNode = startNode;
+        newLevel.Add(currentNode);
+        bool neighboursExist = currentNode.GetLink(NODE_DIRECTION.UP) != null ||
+                                currentNode.GetLink(NODE_DIRECTION.DOWN) != null ||
+                                currentNode.GetLink(NODE_DIRECTION.LEFT) != null ||
+                                currentNode.GetLink(NODE_DIRECTION.RIGHT) != null;
+
+        while (neighboursExist)
+        {
+            NODE_DIRECTION randDir = (NODE_DIRECTION)Random.Range((int)NODE_DIRECTION.UP, (int)NODE_DIRECTION.MAX_DIRECTION);
+            if (Jump(randDir))
+            {
+                newLevel.Add(currentNode);
+            }
+
+            neighboursExist = currentNode.GetLink(NODE_DIRECTION.UP) != null ||
+                                currentNode.GetLink(NODE_DIRECTION.DOWN) != null ||
+                                currentNode.GetLink(NODE_DIRECTION.LEFT) != null ||
+                                currentNode.GetLink(NODE_DIRECTION.RIGHT) != null;
+        }
+
+        foreach (Node node in nodes)
+        {
+            node.Deactivate();
+        }
+        foreach (Node node in newLevel)
+        {
+            node.Activate();
+        }
+
+        currentNode = startNode;
     }
 
     void KeyboardInput()
@@ -234,7 +290,8 @@ public class PlayerController : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        SelectLevel(levelIndex);
+        //SelectLevel(levelIndex);
+        GenerateRandomLevel();
         SetupNodes();
         transform.SetPositionAndRotation(startNode.transform.position, transform.rotation);
     }
@@ -249,7 +306,8 @@ public class PlayerController : MonoBehaviour
         {
             print("you win");
             levelIndex++;
-            SelectLevel(levelIndex);
+            //SelectLevel(levelIndex);
+            GenerateRandomLevel();
             RestartLevel();
         }
     }
