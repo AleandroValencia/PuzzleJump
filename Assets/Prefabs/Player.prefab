@@ -86,11 +86,13 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   currentNode: {fileID: 0}
-  startingStones: 0
+  numStartingStones: 0
   remainingStones: 0
   levelIndex: 0
   flickAmount: 20
   holdToRestartLength: 1.5
+  doubleTapSensitivity: 0.2
+  randomLevelGeneratorPercentage: 33
 --- !u!212 &212160200855597490
 SpriteRenderer:
   m_ObjectHideFlags: 1

@@ -16,8 +16,11 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] float flickAmount = 1.0f;
     [SerializeField] float holdToRestartLength = 1.5f;
+    [SerializeField] float doubleTapSensitivity = 0.7f;
     bool touchHold = false;
     float touchTimer = 0.0f;
+    float doubleTapTimer = 1.0f;
+    int circleCount = 0;
 
     [SerializeField] int randomLevelGeneratorPercentage = 33;
 
@@ -148,6 +151,24 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    NODE_DIRECTION OppositeDirection(NODE_DIRECTION _dir)
+    {
+        switch (_dir)
+        {
+            case NODE_DIRECTION.UP:
+                return NODE_DIRECTION.DOWN;
+            case NODE_DIRECTION.DOWN:
+                return NODE_DIRECTION.UP;
+            case NODE_DIRECTION.LEFT:
+                return NODE_DIRECTION.RIGHT;
+            case NODE_DIRECTION.RIGHT:
+                return NODE_DIRECTION.LEFT;
+            default:
+                break;
+        }
+        return NODE_DIRECTION.MAX_DIRECTION;
+    }
+
     void GenerateRandomLevel()
     {
         startNode = nodes[Random.Range(0, nodes.Length)];
@@ -156,14 +177,14 @@ public class PlayerController : MonoBehaviour
             node.Activate();
         }
         SetupNodes();
-        foreach(Node node in nodes)
+        foreach (Node node in nodes)
         {
             // Turn off random stones
             if (Random.Range(0, 100) < randomLevelGeneratorPercentage && node != startNode)
             {
                 AdjustLink(node);
                 node.Deactivate();
-            }            
+            }
         }
 
         List<Node> newLevel = new List<Node>();
@@ -177,15 +198,18 @@ public class PlayerController : MonoBehaviour
         while (neighboursExist)
         {
             NODE_DIRECTION randDir = (NODE_DIRECTION)Random.Range((int)NODE_DIRECTION.UP, (int)NODE_DIRECTION.MAX_DIRECTION);
-            if (Jump(randDir))
+            if (randDir != OppositeDirection(lastDirection))
             {
-                newLevel.Add(currentNode);
+                if (Jump(randDir))
+                {
+                    newLevel.Add(currentNode);
+                }
             }
 
-            neighboursExist = currentNode.GetLink(NODE_DIRECTION.UP) != null ||
-                                currentNode.GetLink(NODE_DIRECTION.DOWN) != null ||
-                                currentNode.GetLink(NODE_DIRECTION.LEFT) != null ||
-                                currentNode.GetLink(NODE_DIRECTION.RIGHT) != null;
+            neighboursExist = (currentNode.GetLink(NODE_DIRECTION.UP) != null && lastDirection != OppositeDirection(NODE_DIRECTION.UP)) ||
+                                (currentNode.GetLink(NODE_DIRECTION.DOWN) != null && lastDirection != OppositeDirection(NODE_DIRECTION.DOWN)) ||
+                                (currentNode.GetLink(NODE_DIRECTION.LEFT) != null && lastDirection != OppositeDirection(NODE_DIRECTION.LEFT)) ||
+                                (currentNode.GetLink(NODE_DIRECTION.RIGHT) != null && lastDirection != OppositeDirection(NODE_DIRECTION.RIGHT));
         }
 
         foreach (Node node in nodes)
@@ -245,6 +269,7 @@ public class PlayerController : MonoBehaviour
                 touchOrigin.x = -1;
                 GetComponent<SpriteRenderer>().color = Color.red;
                 touchHold = false;
+                bool jumped = false;
 
                 //Check if the difference along the x axis is greater than the difference along the y axis.
                 if (Mathf.Abs(x) > Mathf.Abs(y))
@@ -253,11 +278,13 @@ public class PlayerController : MonoBehaviour
                     {
                         GetComponent<SpriteRenderer>().color = Color.black;
                         Jump(NODE_DIRECTION.RIGHT);
+                        jumped = true;
                     }
                     else if (x < -flickAmount && lastDirection != NODE_DIRECTION.RIGHT)
                     {
                         GetComponent<SpriteRenderer>().color = Color.green;
                         Jump(NODE_DIRECTION.LEFT);
+                        jumped = true;
                     }
                 }
                 else
@@ -266,11 +293,57 @@ public class PlayerController : MonoBehaviour
                     {
                         GetComponent<SpriteRenderer>().color = Color.yellow;
                         Jump(NODE_DIRECTION.UP);
+                        jumped = true;
                     }
                     else if (y < -flickAmount && lastDirection != NODE_DIRECTION.UP)
                     {
-                        GetComponent<SpriteRenderer>().color = Color.white;
+                        GetComponent<SpriteRenderer>().color = Color.grey;
                         Jump(NODE_DIRECTION.DOWN);
+                        jumped = true;
+                    }
+                }
+                
+                if (doubleTapTimer < doubleTapSensitivity && !jumped)
+                {
+                    RestartLevel();
+                }
+                doubleTapTimer = 0.0f;
+
+                if (circleCount > 4)
+                {
+                    //RestartLevel();
+                }
+                circleCount = 0;
+            }
+            else if (myTouch.phase == TouchPhase.Moved)
+            {
+                Vector2 touchEnd = myTouch.position;
+                float x = touchEnd.x - touchOrigin.x;
+                float y = touchEnd.y - touchOrigin.y;
+                if (Mathf.Abs(x) > Mathf.Abs(y))
+                {
+                    if (x > flickAmount * 5 && lastDirection != NODE_DIRECTION.LEFT)
+                    {
+                        GetComponent<SpriteRenderer>().color = Color.black;
+                        circleCount++;
+                    }
+                    else if (x < -flickAmount * 5 && lastDirection != NODE_DIRECTION.RIGHT)
+                    {
+                        GetComponent<SpriteRenderer>().color = Color.green;
+                        circleCount++;
+                    }
+                }
+                else
+                {
+                    if (y > flickAmount * 5 && lastDirection != NODE_DIRECTION.DOWN)
+                    {
+                        GetComponent<SpriteRenderer>().color = Color.yellow;
+                        circleCount++;
+                    }
+                    else if (y < -flickAmount * 5 && lastDirection != NODE_DIRECTION.UP)
+                    {
+                        GetComponent<SpriteRenderer>().color = Color.grey;
+                        circleCount++;
                     }
                 }
             }
@@ -279,10 +352,14 @@ public class PlayerController : MonoBehaviour
         {
             touchTimer += Time.deltaTime;
         }
+        else
+        {
+            doubleTapTimer += Time.deltaTime;
+        }
 
         if (touchTimer > holdToRestartLength)
         {
-            RestartLevel();
+            //RestartLevel();
             touchTimer = 0.0f;
         }
     }

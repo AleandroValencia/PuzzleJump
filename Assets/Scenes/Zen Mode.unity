@@ -360,6 +360,11 @@ Prefab:
       propertyPath: flickAmount
       value: 20
       objectReference: {fileID: 0}
+    - target: {fileID: 114354094712413138, guid: 3002816279c7f0247a32e81394f6ca22,
+        type: 2}
+      propertyPath: doubleTapSensitivity
+      value: 0.2
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3002816279c7f0247a32e81394f6ca22, type: 2}
   m_IsPrefabAsset: 0
