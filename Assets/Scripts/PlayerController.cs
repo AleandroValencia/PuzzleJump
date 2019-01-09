@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] int gridWidth = 5;
-    [SerializeField] int gridHeight = 6;
+    int gridWidth = 5;
+    int gridHeight = 6;
     [SerializeField] Node[] nodes;
-    [SerializeField] Node currentNode;
+    Node currentNode;
     Node startNode;
     NODE_DIRECTION lastDirection = NODE_DIRECTION.MAX_DIRECTION;
-    public int numStartingStones = 0;
-    public int remainingStones = 0;
-    public int levelIndex = 0;
+    int numStartingStones = 0;
+    int remainingStones = 0;
+    int levelIndex = 0;
 
     [SerializeField] float flickAmount = 1.0f;
     [SerializeField] float holdToRestartLength = 1.5f;
@@ -22,10 +22,11 @@ public class PlayerController : MonoBehaviour
     float doubleTapTimer = 1.0f;
     int circleCount = 0;
 
-    [SerializeField] int randomLevelGeneratorPercentage = 33;
+    [Range(0.0f, 100.0f)] [SerializeField] int randomness = 33;
 
     private Vector2 touchOrigin = -Vector2.one; //Used to store location of screen touch origin for mobile controls.
 
+    // Pre-generated levels
     int[,] levels = new int[,] {    {2,0,0,0,0,1,1,1,1,0,1,0,0,1,0,1,1,1,1,0,0,1,0,0,0,0,0,0,0,0 },
                                     {0,1,1,0,0,1,1,0,2,0,1,1,0,0,0,1,1,0,0,0,1,0,1,0,0,0,0,0,0,0 },
                                     {0,2,0,0,0,0,1,1,1,0,1,0,0,1,0,1,0,0,1,0,0,1,1,1,0,0,1,0,0,0 },
@@ -36,6 +37,9 @@ public class PlayerController : MonoBehaviour
                                     {0,1,1,1,0,0,1,0,1,0,2,1,0,1,1,0,1,0,1,0,0,1,1,1,0,0,0,0,0,0 },
                                     {2,0,0,0,0,1,1,0,0,0,1,1,1,0,0,1,1,1,0,0,1,1,0,0,0,1,0,0,0,0 } };
 
+    /// <summary>
+    /// Set links between nodes and keep count of the number of active stones
+    /// </summary>
     void SetupNodes()
     {
         numStartingStones = 0;
@@ -87,6 +91,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Activate all nodes in level and reset their linkes to beginning setting
+    /// </summary>
     void RestartLevel()
     {
         foreach (Node node in nodes)
@@ -102,6 +109,10 @@ public class PlayerController : MonoBehaviour
         lastDirection = NODE_DIRECTION.MAX_DIRECTION;
     }
 
+    /// <summary>
+    /// Link the nodes adjacent to _node to each other before deactivating _node
+    /// </summary>
+    /// <param name="_node"></param>
     void AdjustLink(Node _node)
     {
         // Link the nodes to the up with the down of current node  (and left and right)
@@ -114,6 +125,11 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Move player to the node in the specified _dir
+    /// </summary>
+    /// <param name="_dir"></param>
+    /// <returns></returns>
     bool Jump(NODE_DIRECTION _dir)
     {
         if (currentNode.GetLink(_dir) != null && currentNode.GetLink(_dir).gameObject.activeSelf)
@@ -130,6 +146,10 @@ public class PlayerController : MonoBehaviour
         return false;
     }
 
+    /// <summary>
+    /// Load level _index in the array of pre-generated levels
+    /// </summary>
+    /// <param name="_index"></param>
     void SelectLevel(int _index)
     {
         for (int i = 0; i < 30; ++i)
@@ -151,6 +171,11 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Get the opposite direction of passed in _dir
+    /// </summary>
+    /// <param name="_dir"></param>
+    /// <returns></returns>
     NODE_DIRECTION OppositeDirection(NODE_DIRECTION _dir)
     {
         switch (_dir)
@@ -169,6 +194,10 @@ public class PlayerController : MonoBehaviour
         return NODE_DIRECTION.MAX_DIRECTION;
     }
 
+    /// <summary>
+    /// Activate all nodes, deactivate random nodes, create a path from the active nodes
+    /// and store it in a list. This list becomes the new path
+    /// </summary>
     void GenerateRandomLevel()
     {
         startNode = nodes[Random.Range(0, nodes.Length)];
@@ -180,7 +209,7 @@ public class PlayerController : MonoBehaviour
         foreach (Node node in nodes)
         {
             // Turn off random stones
-            if (Random.Range(0, 100) < randomLevelGeneratorPercentage && node != startNode)
+            if (Random.Range(0, 100) < randomness && node != startNode)
             {
                 AdjustLink(node);
                 node.Deactivate();
@@ -224,6 +253,9 @@ public class PlayerController : MonoBehaviour
         currentNode = startNode;
     }
 
+    /// <summary>
+    /// Arrow keys to move, space to restart level
+    /// </summary>
     void KeyboardInput()
     {
         if (Input.GetKeyDown(KeyCode.UpArrow) && lastDirection != NODE_DIRECTION.DOWN)
@@ -248,6 +280,9 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// swipe in direction to move, double tap to restart level (also hold available)
+    /// </summary>
     void TouchInput()
     {
         if (Input.touchCount > 0)
@@ -302,7 +337,7 @@ public class PlayerController : MonoBehaviour
                         jumped = true;
                     }
                 }
-                
+
                 if (doubleTapTimer < doubleTapSensitivity && !jumped)
                 {
                     RestartLevel();
