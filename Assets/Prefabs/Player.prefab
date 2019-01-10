@@ -52,47 +52,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fecd55994adbba14e9731361edf02955, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridWidth: 5
-  gridHeight: 6
   nodes:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  currentNode: {fileID: 0}
-  numStartingStones: 0
-  remainingStones: 0
-  levelIndex: 0
+  - {fileID: 114505543626446642, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114658311821269370, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114859550152822628, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114699545510098712, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114843994411865478, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114874078409093120, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114032689958136912, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114254541348414212, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114256439821374166, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114847378141224408, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114728596772515034, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114341763801694862, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114498863329579968, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114730469239175780, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114518279046396164, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114560253724036098, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114453139832846598, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114978105453705982, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114950353698091368, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114728290795647210, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114751706884932940, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114766609446554850, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114348626883026552, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114702628428049876, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114363310641797554, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114106244145786732, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114693467330550184, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114443322787919848, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114538505621967108, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  - {fileID: 114612704943920684, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
   flickAmount: 20
-  holdToRestartLength: 1.5
+  touchHoldTimer: 1.5
   doubleTapSensitivity: 0.2
-  randomLevelGeneratorPercentage: 33
+  randomness: 50
+  sounds:
+  - {fileID: 8300000, guid: 24114e37b7db16e48afef59ba888e597, type: 3}
+  - {fileID: 8300000, guid: 2e4ab96b4e16e254eb4a719064a0ee49, type: 3}
+  - {fileID: 8300000, guid: 901c088aabbbe5a4fb78622a0ea1b34a, type: 3}
+  sprites:
+  - {fileID: 21300000, guid: cd8ece95e33b19b42a129ae8b2931496, type: 3}
+  - {fileID: 21300000, guid: e728d141e6bf2534385d1c03d17dd5d6, type: 3}
+  - {fileID: 21300000, guid: 8b1b5455513fb244ab3e84115e8a8e2b, type: 3}
+  - {fileID: 21300000, guid: 179ddaff18e0226478ae6132e4952a1f, type: 3}
 --- !u!212 &212160200855597490
 SpriteRenderer:
   m_ObjectHideFlags: 1

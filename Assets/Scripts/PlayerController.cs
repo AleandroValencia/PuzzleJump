@@ -4,6 +4,14 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    enum SOUNDS
+    {
+        JUMP = 0,
+        VICTORY,
+        RESTART,
+        NUM_SOUNDS
+    }
+
     int gridWidth = 5;
     int gridHeight = 6;
     [SerializeField] Node[] nodes;
@@ -15,14 +23,15 @@ public class PlayerController : MonoBehaviour
     int levelIndex = 0;
 
     [SerializeField] float flickAmount = 1.0f;
-    [SerializeField] float holdToRestartLength = 1.5f;
+    [SerializeField] float touchHoldTimer = 1.5f;
     [SerializeField] float doubleTapSensitivity = 0.7f;
     bool touchHold = false;
     float touchTimer = 0.0f;
     float doubleTapTimer = 1.0f;
-    int circleCount = 0;
 
     [Range(0.0f, 100.0f)] [SerializeField] int randomness = 33;
+    [SerializeField] AudioClip[] sounds;
+    [SerializeField] Sprite[] sprites;
 
     private Vector2 touchOrigin = -Vector2.one; //Used to store location of screen touch origin for mobile controls.
 
@@ -36,6 +45,20 @@ public class PlayerController : MonoBehaviour
                                     {2,0,0,0,0,1,1,1,1,0,1,0,0,1,0,1,0,0,1,0,1,1,1,1,1,0,0,0,0,0 },
                                     {0,1,1,1,0,0,1,0,1,0,2,1,0,1,1,0,1,0,1,0,0,1,1,1,0,0,0,0,0,0 },
                                     {2,0,0,0,0,1,1,0,0,0,1,1,1,0,0,1,1,1,0,0,1,1,0,0,0,1,0,0,0,0 } };
+
+    void PlaySound(SOUNDS _sound)
+    {
+        GetComponent<AudioSource>().clip = sounds[(int)_sound];
+        GetComponent<AudioSource>().pitch = 1.0f;
+        GetComponent<AudioSource>().Play();
+    }
+
+    void PlaySoundRandomPitch(SOUNDS _sound)
+    {
+        GetComponent<AudioSource>().clip = sounds[(int)_sound];
+        GetComponent<AudioSource>().pitch = 1.0f + Random.Range(-0.08f, 0.1f);
+        GetComponent<AudioSource>().Play();
+    }
 
     /// <summary>
     /// Set links between nodes and keep count of the number of active stones
@@ -141,6 +164,8 @@ public class PlayerController : MonoBehaviour
             previousNode.gameObject.SetActive(false);
             lastDirection = _dir;
             remainingStones--;
+            PlaySoundRandomPitch(SOUNDS.JUMP);
+            GetComponent<SpriteRenderer>().sprite = sprites[(int)_dir];
             return true;
         }
         return false;
@@ -274,9 +299,10 @@ public class PlayerController : MonoBehaviour
         {
             Jump(NODE_DIRECTION.RIGHT);
         }
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Return))
         {
             RestartLevel();
+            PlaySound(SOUNDS.RESTART);
         }
     }
 
@@ -338,51 +364,16 @@ public class PlayerController : MonoBehaviour
                     }
                 }
 
-                if (doubleTapTimer < doubleTapSensitivity && !jumped)
+                if (doubleTapTimer < doubleTapSensitivity && !jumped && currentNode != startNode)
                 {
                     RestartLevel();
+                    PlaySound(SOUNDS.RESTART);
                 }
                 doubleTapTimer = 0.0f;
 
-                if (circleCount > 4)
-                {
-                    //RestartLevel();
-                }
-                circleCount = 0;
-            }
-            else if (myTouch.phase == TouchPhase.Moved)
-            {
-                Vector2 touchEnd = myTouch.position;
-                float x = touchEnd.x - touchOrigin.x;
-                float y = touchEnd.y - touchOrigin.y;
-                if (Mathf.Abs(x) > Mathf.Abs(y))
-                {
-                    if (x > flickAmount * 5 && lastDirection != NODE_DIRECTION.LEFT)
-                    {
-                        GetComponent<SpriteRenderer>().color = Color.black;
-                        circleCount++;
-                    }
-                    else if (x < -flickAmount * 5 && lastDirection != NODE_DIRECTION.RIGHT)
-                    {
-                        GetComponent<SpriteRenderer>().color = Color.green;
-                        circleCount++;
-                    }
-                }
-                else
-                {
-                    if (y > flickAmount * 5 && lastDirection != NODE_DIRECTION.DOWN)
-                    {
-                        GetComponent<SpriteRenderer>().color = Color.yellow;
-                        circleCount++;
-                    }
-                    else if (y < -flickAmount * 5 && lastDirection != NODE_DIRECTION.UP)
-                    {
-                        GetComponent<SpriteRenderer>().color = Color.grey;
-                        circleCount++;
-                    }
-                }
             }
         }
+
         if (touchHold)
         {
             touchTimer += Time.deltaTime;
@@ -392,7 +383,7 @@ public class PlayerController : MonoBehaviour
             doubleTapTimer += Time.deltaTime;
         }
 
-        if (touchTimer > holdToRestartLength)
+        if (touchTimer > touchHoldTimer)
         {
             //RestartLevel();
             touchTimer = 0.0f;
@@ -414,13 +405,14 @@ public class PlayerController : MonoBehaviour
         KeyboardInput();
         TouchInput();
 
+        // Level Complete
         if (remainingStones == 1)
         {
-            print("you win");
             levelIndex++;
             //SelectLevel(levelIndex);
             GenerateRandomLevel();
             RestartLevel();
+            PlaySound(SOUNDS.VICTORY);
         }
     }
 }
