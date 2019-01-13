@@ -83,6 +83,8 @@ MonoBehaviour:
   - {fileID: 114443322787919848, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
   - {fileID: 114538505621967108, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
   - {fileID: 114612704943920684, guid: cbcb8829e4ef8804386bf45a0b99cf47, type: 2}
+  jumping: 0
+  jumpSpeed: 1
   flickAmount: 20
   touchHoldTimer: 1.5
   doubleTapSensitivity: 0.2
@@ -92,10 +94,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 2e4ab96b4e16e254eb4a719064a0ee49, type: 3}
   - {fileID: 8300000, guid: 901c088aabbbe5a4fb78622a0ea1b34a, type: 3}
   sprites:
-  - {fileID: 21300000, guid: cd8ece95e33b19b42a129ae8b2931496, type: 3}
-  - {fileID: 21300000, guid: e728d141e6bf2534385d1c03d17dd5d6, type: 3}
-  - {fileID: 21300000, guid: 8b1b5455513fb244ab3e84115e8a8e2b, type: 3}
-  - {fileID: 21300000, guid: 179ddaff18e0226478ae6132e4952a1f, type: 3}
+  - {fileID: 21300000, guid: e1166195d9a33a94abb6fed0ddd533b5, type: 3}
+  - {fileID: 21300000, guid: f43d5c02f83ef8b4997ad53ca64d7ba8, type: 3}
+  - {fileID: 21300000, guid: 960d2841b94907c4191abe5475c048a1, type: 3}
+  - {fileID: 21300000, guid: 960d2841b94907c4191abe5475c048a1, type: 3}
 --- !u!212 &212160200855597490
 SpriteRenderer:
   m_ObjectHideFlags: 1

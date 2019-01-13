@@ -22,6 +22,9 @@ public class PlayerController : MonoBehaviour
     int remainingStones = 0;
     int levelIndex = 0;
 
+    public bool jumping = false;
+    public float jumpSpeed = 1.0f;
+
     [SerializeField] float flickAmount = 1.0f;
     [SerializeField] float touchHoldTimer = 1.5f;
     [SerializeField] float doubleTapSensitivity = 0.7f;
@@ -148,6 +151,17 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    IEnumerator AnimateJump(Vector3 _pos)
+    {
+        jumping = true;
+        while(transform.position != _pos)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, _pos, jumpSpeed);
+            yield return null;
+        }
+        jumping = false;
+    }
+
     /// <summary>
     /// Move player to the node in the specified _dir
     /// </summary>
@@ -160,11 +174,13 @@ public class PlayerController : MonoBehaviour
             AdjustLink(currentNode);
             Node previousNode = currentNode;
             currentNode = currentNode.GetLink(_dir);
-            transform.SetPositionAndRotation(currentNode.transform.position, transform.rotation);
             previousNode.gameObject.SetActive(false);
             lastDirection = _dir;
             remainingStones--;
             PlaySoundRandomPitch(SOUNDS.JUMP);
+
+            transform.SetPositionAndRotation(currentNode.transform.position, transform.rotation);
+            //StartCoroutine(AnimateJump(currentNode.transform.position));
             GetComponent<SpriteRenderer>().sprite = sprites[(int)_dir];
             return true;
         }
@@ -276,6 +292,7 @@ public class PlayerController : MonoBehaviour
         }
 
         currentNode = startNode;
+        transform.SetPositionAndRotation(currentNode.transform.position, transform.rotation);
     }
 
     /// <summary>
@@ -293,10 +310,12 @@ public class PlayerController : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.LeftArrow) && lastDirection != NODE_DIRECTION.RIGHT)
         {
+            GetComponent<SpriteRenderer>().flipX = true;
             Jump(NODE_DIRECTION.LEFT);
         }
         if (Input.GetKeyDown(KeyCode.RightArrow) && lastDirection != NODE_DIRECTION.LEFT)
         {
+            GetComponent<SpriteRenderer>().flipX = false;
             Jump(NODE_DIRECTION.RIGHT);
         }
         if (Input.GetKeyDown(KeyCode.Return))
@@ -318,7 +337,6 @@ public class PlayerController : MonoBehaviour
             if (myTouch.phase == TouchPhase.Began)
             {
                 touchOrigin = myTouch.position;
-                GetComponent<SpriteRenderer>().color = Color.blue;
                 touchHold = true;
                 touchTimer = 0.0f;
             }
@@ -328,7 +346,6 @@ public class PlayerController : MonoBehaviour
                 float x = touchEnd.x - touchOrigin.x;
                 float y = touchEnd.y - touchOrigin.y;
                 touchOrigin.x = -1;
-                GetComponent<SpriteRenderer>().color = Color.red;
                 touchHold = false;
                 bool jumped = false;
 
@@ -337,13 +354,13 @@ public class PlayerController : MonoBehaviour
                 {
                     if (x > flickAmount && lastDirection != NODE_DIRECTION.LEFT)
                     {
-                        GetComponent<SpriteRenderer>().color = Color.black;
+                        GetComponent<SpriteRenderer>().flipX = false;
                         Jump(NODE_DIRECTION.RIGHT);
                         jumped = true;
                     }
                     else if (x < -flickAmount && lastDirection != NODE_DIRECTION.RIGHT)
                     {
-                        GetComponent<SpriteRenderer>().color = Color.green;
+                        GetComponent<SpriteRenderer>().flipX = true;
                         Jump(NODE_DIRECTION.LEFT);
                         jumped = true;
                     }
@@ -352,13 +369,11 @@ public class PlayerController : MonoBehaviour
                 {
                     if (y > flickAmount && lastDirection != NODE_DIRECTION.DOWN)
                     {
-                        GetComponent<SpriteRenderer>().color = Color.yellow;
                         Jump(NODE_DIRECTION.UP);
                         jumped = true;
                     }
                     else if (y < -flickAmount && lastDirection != NODE_DIRECTION.UP)
                     {
-                        GetComponent<SpriteRenderer>().color = Color.grey;
                         Jump(NODE_DIRECTION.DOWN);
                         jumped = true;
                     }
