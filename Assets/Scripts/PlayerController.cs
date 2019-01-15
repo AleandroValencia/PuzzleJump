@@ -35,6 +35,7 @@ public class PlayerController : MonoBehaviour
     [Range(0.0f, 100.0f)] [SerializeField] int randomness = 33;
     [SerializeField] AudioClip[] sounds;
     [SerializeField] Sprite[] sprites;
+    [SerializeField] Sprite[] jumpSprites;
 
     private Vector2 touchOrigin = -Vector2.one; //Used to store location of screen touch origin for mobile controls.
 
@@ -151,17 +152,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    IEnumerator AnimateJump(Vector3 _pos)
-    {
-        jumping = true;
-        while(transform.position != _pos)
-        {
-            transform.position = Vector3.MoveTowards(transform.position, _pos, jumpSpeed);
-            yield return null;
-        }
-        jumping = false;
-    }
-
     /// <summary>
     /// Move player to the node in the specified _dir
     /// </summary>
@@ -177,11 +167,33 @@ public class PlayerController : MonoBehaviour
             previousNode.gameObject.SetActive(false);
             lastDirection = _dir;
             remainingStones--;
-            PlaySoundRandomPitch(SOUNDS.JUMP);
 
-            transform.SetPositionAndRotation(currentNode.transform.position, transform.rotation);
+            PlaySoundRandomPitch(SOUNDS.JUMP);
+            //transform.SetPositionAndRotation(currentNode.transform.position, transform.rotation);
             //StartCoroutine(AnimateJump(currentNode.transform.position));
+            jumping = true;
             GetComponent<SpriteRenderer>().sprite = sprites[(int)_dir];
+            GetComponent<Animator>().Play("Jump");
+            return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Move player to the node in the specified _dir
+    /// </summary>
+    /// <param name="_dir"></param>
+    /// <returns></returns>
+    bool AIJump(NODE_DIRECTION _dir)
+    {
+        if (currentNode.GetLink(_dir) != null && currentNode.GetLink(_dir).gameObject.activeSelf)
+        {
+            AdjustLink(currentNode);
+            Node previousNode = currentNode;
+            currentNode = currentNode.GetLink(_dir);
+            previousNode.gameObject.SetActive(false);
+            lastDirection = _dir;
+            remainingStones--;
             return true;
         }
         return false;
@@ -270,7 +282,7 @@ public class PlayerController : MonoBehaviour
             NODE_DIRECTION randDir = (NODE_DIRECTION)Random.Range((int)NODE_DIRECTION.UP, (int)NODE_DIRECTION.MAX_DIRECTION);
             if (randDir != OppositeDirection(lastDirection))
             {
-                if (Jump(randDir))
+                if (AIJump(randDir))
                 {
                     newLevel.Add(currentNode);
                 }
@@ -292,7 +304,6 @@ public class PlayerController : MonoBehaviour
         }
 
         currentNode = startNode;
-        transform.SetPositionAndRotation(currentNode.transform.position, transform.rotation);
     }
 
     /// <summary>
@@ -417,8 +428,25 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!jumping)
+        {
+
         KeyboardInput();
         TouchInput();
+        }
+        else
+        {
+            if (lastDirection < NODE_DIRECTION.MAX_DIRECTION)
+                GetComponent<SpriteRenderer>().sprite = jumpSprites[(int)lastDirection];
+            transform.position = Vector3.MoveTowards(transform.position, currentNode.transform.position, jumpSpeed);
+            if (transform.position == currentNode.transform.position)
+            {
+                jumping = false;
+                currentNode.GetComponent<Node>().Squish();
+                if (lastDirection < NODE_DIRECTION.MAX_DIRECTION)
+                    GetComponent<SpriteRenderer>().sprite = sprites[(int)lastDirection];
+            }
+        }
 
         // Level Complete
         if (remainingStones == 1)

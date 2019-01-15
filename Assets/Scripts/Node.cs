@@ -48,4 +48,9 @@ public class Node : MonoBehaviour {
             activeAtStart = true;
         }
     }
+
+    public void Squish()
+    {
+        GetComponent<Animator>().Play("Squish");
+    }
 }
