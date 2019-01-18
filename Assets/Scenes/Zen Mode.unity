@@ -2111,7 +2111,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 5.4
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -2151,7 +2151,7 @@ GameObject:
   - component: {fileID: 535943938}
   - component: {fileID: 535943937}
   m_Layer: 0
-  m_Name: leaf_a (3)
+  m_Name: leaf_tl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2166,7 +2166,7 @@ Animator:
   m_GameObject: {fileID: 535943936}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: da5b9c7f839ef9d4683504a89e10ad71, type: 2}
+  m_Controller: {fileID: 9100000, guid: eb0513f2779959f47a0ba434841b6c24, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -2228,7 +2228,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 535943936}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -3.64, y: -1.47, z: 0}
+  m_LocalPosition: {x: -4.62, y: -1.21, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1608377560}
@@ -2258,7 +2258,7 @@ GameObject:
   - component: {fileID: 599122826}
   - component: {fileID: 599122825}
   m_Layer: 0
-  m_Name: GameObject (1)
+  m_Name: leaf_bl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2488,7 +2488,7 @@ GameObject:
   - component: {fileID: 914522053}
   - component: {fileID: 914522055}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: leaf_tr
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3028,13 +3028,13 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1608377559}
-  m_LocalRotation: {x: 0, y: 0, z: -0.10617726, w: 0.9943472}
+  m_LocalRotation: {x: 0, y: 0, z: -0.23971981, w: 0.9708422}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 535943939}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -12.19}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -27.74}
 --- !u!212 &1608377561
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -3191,7 +3191,7 @@ GameObject:
   - component: {fileID: 1891561837}
   - component: {fileID: 1891561836}
   m_Layer: 0
-  m_Name: leaf_a (1)
+  m_Name: leaf_mr
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3206,7 +3206,7 @@ Animator:
   m_GameObject: {fileID: 1891561835}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: fbbc1fb23547bfb4bb02cc3ac0529cc2, type: 2}
+  m_Controller: {fileID: 9100000, guid: 007d93743f4fff244a0c80590219e71d, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0
@@ -3267,14 +3267,14 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1891561835}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: -0.035161205, w: 0.99938166}
   m_LocalPosition: {x: 2.87, y: -3.48, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1725910432}
   m_Father: {fileID: 0}
   m_RootOrder: 7
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -4.03}
 --- !u!114 &1948270221 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 114950353698091368, guid: cbcb8829e4ef8804386bf45a0b99cf47,
@@ -3292,7 +3292,7 @@ GameObject:
   - component: {fileID: 1965972339}
   - component: {fileID: 1965972338}
   m_Layer: 0
-  m_Name: leaf_a
+  m_Name: leaf_br
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3461,7 +3461,7 @@ GameObject:
   - component: {fileID: 2081020936}
   - component: {fileID: 2081020935}
   m_Layer: 0
-  m_Name: leaf_a (2)
+  m_Name: leaf_ml
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

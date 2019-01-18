@@ -171,12 +171,11 @@ public class PlayerController : MonoBehaviour
             Node previousNode = currentNode;
             currentNode = currentNode.GetLink(_dir);
             previousNode.gameObject.SetActive(false);
+            //StartCoroutine(previousNode.GetComponent<Node>().Scatter(OppositeDirection(_dir)));
             lastDirection = _dir;
             remainingStones--;
 
             PlaySoundRandomPitch(SOUNDS.JUMP);
-            //transform.SetPositionAndRotation(currentNode.transform.position, transform.rotation);
-            //StartCoroutine(AnimateJump(currentNode.transform.position));
             jumping = true;
             GetComponent<SpriteRenderer>().sprite = sprites[(int)_dir];
             animator.SetFloat("Idle_Pos", (float)_dir);
@@ -314,6 +313,10 @@ public class PlayerController : MonoBehaviour
         }
 
         currentNode = startNode;
+        if (newLevel.Count < 6)
+        {
+            GenerateRandomLevel();
+        }
     }
 
     /// <summary>
@@ -442,6 +445,15 @@ public class PlayerController : MonoBehaviour
     {
         if (!jumping)
         {
+            // Level Complete
+            if (remainingStones == 1)
+            {
+                levelIndex++;
+                //SelectLevel(levelIndex);
+                GenerateRandomLevel();
+                RestartLevel();
+                PlaySound(SOUNDS.VICTORY);
+            }
             animator.SetBool("Jumping", false);
             KeyboardInput();
             TouchInput();
@@ -461,21 +473,12 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        // Level Complete
-        if (remainingStones == 1)
-        {
-            levelIndex++;
-            //SelectLevel(levelIndex);
-            GenerateRandomLevel();
-            RestartLevel();
-            PlaySound(SOUNDS.VICTORY);
-        }
-
         idleTimer += Time.deltaTime;
         if (idleTimer > idleAlarm)
         {
             // play idle anim
-            animator.SetBool("Waiting", true);
+            animator.SetBool("Waiting", !animator.GetBool("Waiting"));
+            idleTimer = 0.0f;
         }
 
         if (Vector2.Distance(transform.position, currentNode.transform.position) > distanceFromNextRock / 2.0f)
