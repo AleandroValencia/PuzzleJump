@@ -16,7 +16,8 @@ public class Node : MonoBehaviour {
     // Up, Down, Left, Right
     public Node[] nodeLink = new Node[(int)NODE_DIRECTION.MAX_DIRECTION] { null, null, null, null };
     public bool activeAtStart = false;
-    [SerializeField] int index;
+    [SerializeField] Sprite[] sprites;
+    SpriteRenderer renderer;
 
     public bool StartedActive() { return activeAtStart; }
     public void SetLink(NODE_DIRECTION _dir, Node _nodeLink)
@@ -37,6 +38,8 @@ public class Node : MonoBehaviour {
 
     public void Activate()
     {
+        int rand = Random.Range(0, 3);
+        renderer.sprite = sprites[rand];
         activeAtStart = true;
         gameObject.SetActive(true);
     }
@@ -47,6 +50,9 @@ public class Node : MonoBehaviour {
         {
             activeAtStart = true;
         }
+        renderer = GetComponent<SpriteRenderer>();
+        int rand = Random.Range(0, 3);
+        renderer.sprite = sprites[rand];
     }
 
     public void Squish()

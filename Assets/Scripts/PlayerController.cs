@@ -28,14 +28,20 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float flickAmount = 1.0f;
     [SerializeField] float touchHoldTimer = 1.5f;
     [SerializeField] float doubleTapSensitivity = 0.7f;
+    [SerializeField] float idleAlarm = 3.0f;
     bool touchHold = false;
     float touchTimer = 0.0f;
     float doubleTapTimer = 1.0f;
+    float idleTimer = 0.0f;
 
     [Range(0.0f, 100.0f)] [SerializeField] int randomness = 33;
     [SerializeField] AudioClip[] sounds;
     [SerializeField] Sprite[] sprites;
     [SerializeField] Sprite[] jumpSprites;
+
+    Animator animator;
+    float distanceFromNextRock = 0.0f;
+    float scaleAmount = 0.1f;
 
     private Vector2 touchOrigin = -Vector2.one; //Used to store location of screen touch origin for mobile controls.
 
@@ -173,7 +179,11 @@ public class PlayerController : MonoBehaviour
             //StartCoroutine(AnimateJump(currentNode.transform.position));
             jumping = true;
             GetComponent<SpriteRenderer>().sprite = sprites[(int)_dir];
-            GetComponent<Animator>().Play("Jump");
+            animator.SetFloat("Idle_Pos", (float)_dir);
+            animator.SetBool("Waiting", false);
+            idleTimer = 0.0f;
+
+            distanceFromNextRock = Vector2.Distance(transform.position, currentNode.transform.position);
             return true;
         }
         return false;
@@ -350,6 +360,7 @@ public class PlayerController : MonoBehaviour
                 touchOrigin = myTouch.position;
                 touchHold = true;
                 touchTimer = 0.0f;
+                idleTimer = 0.0f;
             }
             else if (myTouch.phase == TouchPhase.Ended && touchOrigin.x >= 0)
             {
@@ -423,6 +434,7 @@ public class PlayerController : MonoBehaviour
         GenerateRandomLevel();
         SetupNodes();
         transform.SetPositionAndRotation(startNode.transform.position, transform.rotation);
+        animator = GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -430,12 +442,13 @@ public class PlayerController : MonoBehaviour
     {
         if (!jumping)
         {
-
-        KeyboardInput();
-        TouchInput();
+            animator.SetBool("Jumping", false);
+            KeyboardInput();
+            TouchInput();
         }
         else
         {
+            animator.SetBool("Jumping", true);
             if (lastDirection < NODE_DIRECTION.MAX_DIRECTION)
                 GetComponent<SpriteRenderer>().sprite = jumpSprites[(int)lastDirection];
             transform.position = Vector3.MoveTowards(transform.position, currentNode.transform.position, jumpSpeed);
@@ -456,6 +469,23 @@ public class PlayerController : MonoBehaviour
             GenerateRandomLevel();
             RestartLevel();
             PlaySound(SOUNDS.VICTORY);
+        }
+
+        idleTimer += Time.deltaTime;
+        if (idleTimer > idleAlarm)
+        {
+            // play idle anim
+            animator.SetBool("Waiting", true);
+        }
+
+        if (Vector2.Distance(transform.position, currentNode.transform.position) > distanceFromNextRock / 2.0f)
+        {
+            transform.localScale += new Vector3(scaleAmount, scaleAmount);
+        }
+        else
+        {
+            if (transform.localScale.x > 1.0f)
+                transform.localScale -= new Vector3(scaleAmount, scaleAmount);
         }
     }
 }
