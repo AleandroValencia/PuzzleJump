@@ -35,20 +35,6 @@ public class Node : MonoBehaviour
         return nodeLink[(int)_dir];
     }
 
-    public void Deactivate()
-    {
-        activeAtStart = false;
-        gameObject.SetActive(false);
-    }
-
-    public void Activate()
-    {
-        int rand = Random.Range(0, sprites.Length);
-        renderer.sprite = sprites[rand];
-        activeAtStart = true;
-        gameObject.SetActive(true);
-    }
-
     public void StopScattering()
     {
         scattering = false;
@@ -69,6 +55,36 @@ public class Node : MonoBehaviour
         return false;
     }
 
+    public void Squish()
+    {
+        GetComponent<Animator>().Play("Squish");
+    }
+
+    /// <summary>
+    /// Node is NOT active for this level
+    /// </summary>
+    public void Deactivate()
+    {
+        activeAtStart = false;
+        gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// Assign random sprite and set active for this level
+    /// </summary>
+    public void Activate()
+    {
+        int rand = Random.Range(0, sprites.Length);
+        renderer.sprite = sprites[rand];
+        activeAtStart = true;
+        gameObject.SetActive(true);
+    }
+
+    /// <summary>
+    /// Bug flees when player leaves the bug
+    /// </summary>
+    /// <param name="_dir"></param>
+    /// <returns></returns>
     public IEnumerator Scatter(NODE_DIRECTION _dir)
     {
         float acceleration = Random.Range(-scatterAcceleration, scatterAcceleration);
@@ -120,10 +136,5 @@ public class Node : MonoBehaviour
         int rand = Random.Range(0, 3);
         renderer.sprite = sprites[rand];
         startPos = transform.position;
-    }
-
-    public void Squish()
-    {
-        GetComponent<Animator>().Play("Squish");
     }
 }

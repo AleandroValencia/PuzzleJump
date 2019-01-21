@@ -25,6 +25,9 @@ GameObject:
   - component: {fileID: 199913641487739258}
   - component: {fileID: 198737505182522936}
   - component: {fileID: 95629952532789330}
+  - component: {fileID: 114563560847221640}
+  - component: {fileID: 114118764789608822}
+  - component: {fileID: 114492787196177378}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -158,6 +161,18 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &114118764789608822
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1188995962325178}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04749fe6efe25924ebc83d79ff5e327a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  idleAlarm: 3
 --- !u!114 &114354094712413138
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -167,6 +182,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fecd55994adbba14e9731361edf02955, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  jumpSpeed: 0.2
+  flickAmount: 20
+  touchHoldTimer: 1.5
+  doubleTapSensitivity: 0.2
+--- !u!114 &114492787196177378
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1188995962325178}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e716e29342658434ea79b9f2612c2ed4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   nodes:
@@ -200,27 +230,22 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  jumping: 0
-  jumpSpeed: 0.2
-  flickAmount: 20
-  touchHoldTimer: 1.5
-  doubleTapSensitivity: 0.2
-  idleAlarm: 6
   randomness: 50
+--- !u!114 &114563560847221640
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1188995962325178}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea022b7f1616bd64c9d4015d3a814a43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   sounds:
   - {fileID: 8300000, guid: 24114e37b7db16e48afef59ba888e597, type: 3}
   - {fileID: 8300000, guid: 2e4ab96b4e16e254eb4a719064a0ee49, type: 3}
   - {fileID: 8300000, guid: 901c088aabbbe5a4fb78622a0ea1b34a, type: 3}
-  sprites:
-  - {fileID: 21300000, guid: 596a11829500cde439050ec9b6a51ce2, type: 3}
-  - {fileID: 21300000, guid: b072c1fa76ab9a647ad9217a06ddd814, type: 3}
-  - {fileID: 21300000, guid: 38341277c865c1448bc2dd83a1743544, type: 3}
-  - {fileID: 21300000, guid: 38341277c865c1448bc2dd83a1743544, type: 3}
-  jumpSprites:
-  - {fileID: 21300000, guid: 0bc433f17bc16b947b29c56ea1f04e05, type: 3}
-  - {fileID: 21300000, guid: 76461b8d52ac0114685505c82a3ec91e, type: 3}
-  - {fileID: 21300000, guid: eeeba991dc2170e438336fc9ebb12af6, type: 3}
-  - {fileID: 21300000, guid: eeeba991dc2170e438336fc9ebb12af6, type: 3}
 --- !u!198 &198737505182522936
 ParticleSystem:
   m_ObjectHideFlags: 1

@@ -4,161 +4,23 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    enum SOUNDS
-    {
-        JUMP = 0,
-        VICTORY,
-        RESTART,
-        NUM_SOUNDS
-    }
-
-    int gridWidth = 5;
-    int gridHeight = 6;
-    [SerializeField] Node[] nodes;
-    Node currentNode;
-    Node startNode;
-    NODE_DIRECTION lastDirection = NODE_DIRECTION.MAX_DIRECTION;
-    int numStartingStones = 0;
-    int remainingStones = 0;
-    int levelIndex = 0;
-
-    public bool jumping = false;
-    public float jumpSpeed = 1.0f;
-
+    [SerializeField] float jumpSpeed = 1.0f;
     [SerializeField] float flickAmount = 1.0f;
     [SerializeField] float touchHoldTimer = 1.5f;
     [SerializeField] float doubleTapSensitivity = 0.7f;
-    [SerializeField] float idleAlarm = 3.0f;
+
+    LevelManager levelManager;
+    SoundManager sfx;
+    AnimationScript animationController;
+    int levelIndex = 0;
+    bool jumping = false;
     bool touchHold = false;
     float touchTimer = 0.0f;
     float doubleTapTimer = 1.0f;
-    float idleTimer = 0.0f;
-
-    [Range(0.0f, 100.0f)] [SerializeField] int randomness = 33;
-    [SerializeField] AudioClip[] sounds;
-    [SerializeField] Sprite[] sprites;
-    [SerializeField] Sprite[] jumpSprites;
-
-    Animator animator;
     float distanceFromNextRock = 0.0f;
     float scaleAmount = 0.1f;
 
     private Vector2 touchOrigin = -Vector2.one; //Used to store location of screen touch origin for mobile controls.
-
-    // Pre-generated levels
-    int[,] levels = new int[,] {    {2,0,0,0,0,1,1,1,1,0,1,0,0,1,0,1,1,1,1,0,0,1,0,0,0,0,0,0,0,0 },
-                                    {0,1,1,0,0,1,1,0,2,0,1,1,0,0,0,1,1,0,0,0,1,0,1,0,0,0,0,0,0,0 },
-                                    {0,2,0,0,0,0,1,1,1,0,1,0,0,1,0,1,0,0,1,0,0,1,1,1,0,0,1,0,0,0 },
-                                    {0,0,0,2,0,0,1,1,1,0,0,1,1,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0 },
-                                    {0,1,1,0,0,1,0,0,1,0,1,0,0,1,0,1,1,1,1,2,1,0,0,0,0,0,0,0,0,0 },
-                                    {0,1,1,1,0,0,1,1,1,0,1,1,0,1,2,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0 },
-                                    {2,0,0,0,0,1,1,1,1,0,1,0,0,1,0,1,0,0,1,0,1,1,1,1,1,0,0,0,0,0 },
-                                    {0,1,1,1,0,0,1,0,1,0,2,1,0,1,1,0,1,0,1,0,0,1,1,1,0,0,0,0,0,0 },
-                                    {2,0,0,0,0,1,1,0,0,0,1,1,1,0,0,1,1,1,0,0,1,1,0,0,0,1,0,0,0,0 } };
-
-    void PlaySound(SOUNDS _sound)
-    {
-        GetComponent<AudioSource>().clip = sounds[(int)_sound];
-        GetComponent<AudioSource>().pitch = 1.0f;
-        GetComponent<AudioSource>().Play();
-    }
-
-    void PlaySoundRandomPitch(SOUNDS _sound)
-    {
-        GetComponent<AudioSource>().clip = sounds[(int)_sound];
-        GetComponent<AudioSource>().pitch = 1.0f + Random.Range(-0.08f, 0.1f);
-        GetComponent<AudioSource>().Play();
-    }
-
-    /// <summary>
-    /// Set links between nodes and keep count of the number of active stones
-    /// </summary>
-    void SetupNodes()
-    {
-        numStartingStones = 0;
-        remainingStones = 0;
-        // TODO: OPTIMIZE
-        for (int i = 0; i < nodes.Length; ++i)
-        {
-            if (nodes[i].StartedActive())
-            {
-                // set up link
-                for (int j = i - gridWidth; j >= 0; j -= gridWidth)
-                {
-                    if (nodes[j].gameObject.activeSelf)
-                    {
-                        nodes[i].SetLink(NODE_DIRECTION.UP, nodes[j]);
-                        break;
-                    }
-                }
-                // set down link
-                for (int j = i + gridWidth; j < gridHeight * gridWidth; j += gridWidth)
-                {
-                    if (nodes[j].gameObject.activeSelf)
-                    {
-                        nodes[i].SetLink(NODE_DIRECTION.DOWN, nodes[j]);
-                        break;
-                    }
-                }
-                // Set left link
-                for (int j = i - 1; j >= (i / gridWidth) * gridWidth; --j)
-                {
-                    if (nodes[j].gameObject.activeSelf)
-                    {
-                        nodes[i].SetLink(NODE_DIRECTION.LEFT, nodes[j]);
-                        break;
-                    }
-                }
-                // set right link
-                for (int j = i + 1; j < (i / gridWidth + 1) * gridWidth; ++j)
-                {
-                    if (nodes[j].gameObject.activeSelf)
-                    {
-                        nodes[i].SetLink(NODE_DIRECTION.RIGHT, nodes[j]);
-                        break;
-                    }
-                }
-                remainingStones++;
-                numStartingStones++;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Activate all nodes in level and reset their links to beginning setting
-    /// </summary>
-    void RestartLevel()
-    {
-        foreach (Node node in nodes)
-        {
-            node.StopScattering();
-            if (node.activeAtStart)
-            {
-                node.gameObject.SetActive(true);
-                node.ResetPosition();
-            }
-        }
-        SetupNodes();   // reset links
-        transform.SetPositionAndRotation(startNode.transform.position, transform.rotation);
-        currentNode = startNode;
-        lastDirection = NODE_DIRECTION.MAX_DIRECTION;
-    }
-
-    /// <summary>
-    /// Link the nodes adjacent to _node to each other before deactivating _node
-    /// </summary>
-    /// <param name="_node"></param>
-    void AdjustLink(Node _node)
-    {
-        // Link the nodes to the up with the down of current node  (and left and right)
-        for (int i = 0; i < 4; i += 2)
-        {
-            if (_node.GetLink((NODE_DIRECTION)i) != null)
-                _node.GetLink((NODE_DIRECTION)i).SetLink((NODE_DIRECTION)i + 1, _node.GetLink((NODE_DIRECTION)i + 1));
-            if (_node.GetLink((NODE_DIRECTION)i + 1) != null)
-                _node.GetLink((NODE_DIRECTION)i + 1).SetLink((NODE_DIRECTION)i, _node.GetLink((NODE_DIRECTION)i));
-        }
-    }
 
     /// <summary>
     /// Move player to the node in the specified _dir
@@ -167,187 +29,79 @@ public class PlayerController : MonoBehaviour
     /// <returns></returns>
     bool Jump(NODE_DIRECTION _dir)
     {
-        if (currentNode.GetLink(_dir) != null && currentNode.GetLink(_dir).gameObject.activeSelf)
+        if (levelManager.CurrentNode.GetLink(_dir) != null && levelManager.CurrentNode.GetLink(_dir).gameObject.activeSelf)
         {
-            AdjustLink(currentNode);
-            Node previousNode = currentNode;
-            currentNode = currentNode.GetLink(_dir);
-            //previousNode.gameObject.SetActive(false);
-            StartCoroutine(previousNode.GetComponent<Node>().Scatter(OppositeDirection(_dir)));
-            lastDirection = _dir;
-            remainingStones--;
+            levelManager.AdjustLink(levelManager.CurrentNode);
+            Node previousNode = levelManager.CurrentNode;
+            levelManager.CurrentNode = levelManager.CurrentNode.GetLink(_dir);
+            StartCoroutine(previousNode.GetComponent<Node>().Scatter(levelManager.OppositeDirection(_dir)));
+            levelManager.LastDirection = _dir;
+            levelManager.DecrementRemainingStones();
 
-            PlaySoundRandomPitch(SOUNDS.JUMP);
+            sfx.PlaySoundRandomPitch(SoundManager.SOUNDS.JUMP);
             jumping = true;
-            GetComponent<SpriteRenderer>().sprite = sprites[(int)_dir];
-            animator.SetFloat("Idle_Pos", (float)_dir);
-            animator.SetBool("Waiting", false);
-            idleTimer = 0.0f;
+            animationController.SetJumpPose(_dir);
+            animationController.SetWaiting(false);
+            animationController.ResetIdleTimer();
 
-            distanceFromNextRock = Vector2.Distance(transform.position, currentNode.transform.position);
+            distanceFromNextRock = Vector2.Distance(transform.position, levelManager.CurrentNode.transform.position);
             return true;
         }
         return false;
     }
 
-    /// <summary>
-    /// Move player to the node in the specified _dir
-    /// </summary>
-    /// <param name="_dir"></param>
-    /// <returns></returns>
-    bool AIJump(NODE_DIRECTION _dir)
-    {
-        if (currentNode.GetLink(_dir) != null && currentNode.GetLink(_dir).gameObject.activeSelf)
-        {
-            AdjustLink(currentNode);
-            Node previousNode = currentNode;
-            currentNode = currentNode.GetLink(_dir);
-            previousNode.gameObject.SetActive(false);
-            lastDirection = _dir;
-            remainingStones--;
-            return true;
-        }
-        return false;
-    }
 
     /// <summary>
-    /// Load level _index in the array of pre-generated levels
-    /// </summary>
-    /// <param name="_index"></param>
-    void SelectLevel(int _index)
-    {
-        for (int i = 0; i < 30; ++i)
-        {
-            if (levels[_index, i] == 0)
-            {
-                nodes[i].Deactivate();
-            }
-            else if (levels[_index, i] == 1)
-            {
-                nodes[i].Activate();
-            }
-            else if (levels[_index, i] == 2)
-            {
-                nodes[i].Activate();
-                startNode = nodes[i];
-                currentNode = startNode;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Get the opposite direction of passed in _dir
-    /// </summary>
-    /// <param name="_dir"></param>
-    /// <returns></returns>
-    NODE_DIRECTION OppositeDirection(NODE_DIRECTION _dir)
-    {
-        switch (_dir)
-        {
-            case NODE_DIRECTION.UP:
-                return NODE_DIRECTION.DOWN;
-            case NODE_DIRECTION.DOWN:
-                return NODE_DIRECTION.UP;
-            case NODE_DIRECTION.LEFT:
-                return NODE_DIRECTION.RIGHT;
-            case NODE_DIRECTION.RIGHT:
-                return NODE_DIRECTION.LEFT;
-            default:
-                break;
-        }
-        return NODE_DIRECTION.MAX_DIRECTION;
-    }
-
-    /// <summary>
-    /// Activate all nodes, deactivate random nodes, create a path from the active nodes
-    /// and store it in a list. This list becomes the new path
-    /// </summary>
-    void GenerateRandomLevel()
-    {
-        startNode = nodes[Random.Range(0, nodes.Length)];
-        foreach (Node node in nodes)
-        {
-            node.Activate();
-        }
-        SetupNodes();
-        foreach (Node node in nodes)
-        {
-            // Turn off random stones
-            if (Random.Range(0, 100) < randomness && node != startNode)
-            {
-                AdjustLink(node);
-                node.Deactivate();
-            }
-        }
-
-        List<Node> newLevel = new List<Node>();
-        currentNode = startNode;
-        newLevel.Add(currentNode);
-        bool neighboursExist = currentNode.GetLink(NODE_DIRECTION.UP) != null ||
-                                currentNode.GetLink(NODE_DIRECTION.DOWN) != null ||
-                                currentNode.GetLink(NODE_DIRECTION.LEFT) != null ||
-                                currentNode.GetLink(NODE_DIRECTION.RIGHT) != null;
-
-        while (neighboursExist)
-        {
-            NODE_DIRECTION randDir = (NODE_DIRECTION)Random.Range((int)NODE_DIRECTION.UP, (int)NODE_DIRECTION.MAX_DIRECTION);
-            if (randDir != OppositeDirection(lastDirection))
-            {
-                if (AIJump(randDir))
-                {
-                    newLevel.Add(currentNode);
-                }
-            }
-
-            neighboursExist = (currentNode.GetLink(NODE_DIRECTION.UP) != null && lastDirection != OppositeDirection(NODE_DIRECTION.UP)) ||
-                                (currentNode.GetLink(NODE_DIRECTION.DOWN) != null && lastDirection != OppositeDirection(NODE_DIRECTION.DOWN)) ||
-                                (currentNode.GetLink(NODE_DIRECTION.LEFT) != null && lastDirection != OppositeDirection(NODE_DIRECTION.LEFT)) ||
-                                (currentNode.GetLink(NODE_DIRECTION.RIGHT) != null && lastDirection != OppositeDirection(NODE_DIRECTION.RIGHT));
-        }
-
-        foreach (Node node in nodes)
-        {
-            node.Deactivate();
-        }
-        foreach (Node node in newLevel)
-        {
-            node.Activate();
-        }
-
-        currentNode = startNode;
-        if (newLevel.Count < 6)
-        {
-            GenerateRandomLevel();
-        }
-    }
-
-    /// <summary>
-    /// Arrow keys to move, space to restart level
+    /// Arrow keys to move, enter to restart level
     /// </summary>
     void KeyboardInput()
     {
-        if (Input.GetKeyDown(KeyCode.UpArrow) && lastDirection != NODE_DIRECTION.DOWN)
+        if (Input.GetKeyDown(KeyCode.UpArrow) && levelManager.LastDirection != NODE_DIRECTION.DOWN)
         {
             Jump(NODE_DIRECTION.UP);
         }
-        if (Input.GetKeyDown(KeyCode.DownArrow) && lastDirection != NODE_DIRECTION.UP)
+        if (Input.GetKeyDown(KeyCode.DownArrow) && levelManager.LastDirection != NODE_DIRECTION.UP)
         {
             Jump(NODE_DIRECTION.DOWN);
         }
-        if (Input.GetKeyDown(KeyCode.LeftArrow) && lastDirection != NODE_DIRECTION.RIGHT)
+        if (Input.GetKeyDown(KeyCode.LeftArrow) && levelManager.LastDirection != NODE_DIRECTION.RIGHT)
         {
             GetComponent<SpriteRenderer>().flipX = true;
             Jump(NODE_DIRECTION.LEFT);
         }
-        if (Input.GetKeyDown(KeyCode.RightArrow) && lastDirection != NODE_DIRECTION.LEFT)
+        if (Input.GetKeyDown(KeyCode.RightArrow) && levelManager.LastDirection != NODE_DIRECTION.LEFT)
         {
             GetComponent<SpriteRenderer>().flipX = false;
             Jump(NODE_DIRECTION.RIGHT);
         }
         if (Input.GetKeyDown(KeyCode.Return))
         {
-            RestartLevel();
-            PlaySound(SOUNDS.RESTART);
+            levelManager.RestartLevel();
+            sfx.PlaySound(SoundManager.SOUNDS.RESTART);
+        }
+    }
+
+    /// <summary>
+    /// Increment timers based on input
+    /// </summary>
+    void TouchTimers()
+    {
+        if (touchHold)
+        {
+            // Increment hold timer
+            touchTimer += Time.deltaTime;
+        }
+        else
+        {
+            // Increment not holding timer
+            doubleTapTimer += Time.deltaTime;
+        }
+
+        // Touch held for more than hold timer
+        if (touchTimer > touchHoldTimer)
+        {
+            // Do stuff...
+            touchTimer = 0.0f;
         }
     }
 
@@ -365,7 +119,7 @@ public class PlayerController : MonoBehaviour
                 touchOrigin = myTouch.position;
                 touchHold = true;
                 touchTimer = 0.0f;
-                idleTimer = 0.0f;
+                animationController.ResetIdleTimer();
             }
             else if (myTouch.phase == TouchPhase.Ended && touchOrigin.x >= 0)
             {
@@ -379,13 +133,13 @@ public class PlayerController : MonoBehaviour
                 //Check if the difference along the x axis is greater than the difference along the y axis.
                 if (Mathf.Abs(x) > Mathf.Abs(y))
                 {
-                    if (x > flickAmount && lastDirection != NODE_DIRECTION.LEFT)
+                    if (x > flickAmount && levelManager.LastDirection != NODE_DIRECTION.LEFT)
                     {
                         GetComponent<SpriteRenderer>().flipX = false;
                         Jump(NODE_DIRECTION.RIGHT);
                         jumped = true;
                     }
-                    else if (x < -flickAmount && lastDirection != NODE_DIRECTION.RIGHT)
+                    else if (x < -flickAmount && levelManager.LastDirection != NODE_DIRECTION.RIGHT)
                     {
                         GetComponent<SpriteRenderer>().flipX = true;
                         Jump(NODE_DIRECTION.LEFT);
@@ -394,52 +148,38 @@ public class PlayerController : MonoBehaviour
                 }
                 else
                 {
-                    if (y > flickAmount && lastDirection != NODE_DIRECTION.DOWN)
+                    if (y > flickAmount && levelManager.LastDirection != NODE_DIRECTION.DOWN)
                     {
                         Jump(NODE_DIRECTION.UP);
                         jumped = true;
                     }
-                    else if (y < -flickAmount && lastDirection != NODE_DIRECTION.UP)
+                    else if (y < -flickAmount && levelManager.LastDirection != NODE_DIRECTION.UP)
                     {
                         Jump(NODE_DIRECTION.DOWN);
                         jumped = true;
                     }
                 }
 
-                if (doubleTapTimer < doubleTapSensitivity && !jumped && currentNode != startNode)
+                // DoubleTap
+                if (doubleTapTimer < doubleTapSensitivity && !jumped && levelManager.CurrentNode != levelManager.StartNode)
                 {
-                    RestartLevel();
-                    PlaySound(SOUNDS.RESTART);
+                    levelManager.RestartLevel();
+                    sfx.PlaySound(SoundManager.SOUNDS.RESTART);
                 }
                 doubleTapTimer = 0.0f;
-
             }
         }
 
-        if (touchHold)
-        {
-            touchTimer += Time.deltaTime;
-        }
-        else
-        {
-            doubleTapTimer += Time.deltaTime;
-        }
-
-        if (touchTimer > touchHoldTimer)
-        {
-            //RestartLevel();
-            touchTimer = 0.0f;
-        }
+        TouchTimers();
     }
 
     // Use this for initialization
     void Start()
     {
-        //SelectLevel(levelIndex);
-        GenerateRandomLevel();
-        SetupNodes();
-        transform.SetPositionAndRotation(startNode.transform.position, transform.rotation);
-        animator = GetComponent<Animator>();
+        sfx = GetComponent<SoundManager>();
+        animationController = GetComponent<AnimationScript>();
+        levelManager = GetComponent<LevelManager>();
+        transform.SetPositionAndRotation(levelManager.StartNodePosition(), transform.rotation);
     }
 
     // Update is called once per frame
@@ -448,42 +188,31 @@ public class PlayerController : MonoBehaviour
         if (!jumping)
         {
             // Level Complete
-            if (remainingStones == 1)
+            if (levelManager.RemainingStones == 1)
             {
                 levelIndex++;
                 //SelectLevel(levelIndex);
-                GenerateRandomLevel();
-                RestartLevel();
-                PlaySound(SOUNDS.VICTORY);
+                levelManager.GenerateRandomLevel();
+                levelManager.RestartLevel();
+                sfx.PlaySound(SoundManager.SOUNDS.VICTORY);
             }
-            animator.SetBool("Jumping", false);
+            animationController.Jump(false);
             KeyboardInput();
             TouchInput();
         }
         else
         {
-            animator.SetBool("Jumping", true);
-            if (lastDirection < NODE_DIRECTION.MAX_DIRECTION)
-                GetComponent<SpriteRenderer>().sprite = jumpSprites[(int)lastDirection];
-            transform.position = Vector3.MoveTowards(transform.position, currentNode.transform.position, jumpSpeed);
-            if (transform.position == currentNode.transform.position)
+            animationController.Jump(true);
+            transform.position = Vector3.MoveTowards(transform.position, levelManager.CurrentNode.transform.position, jumpSpeed);
+            if (transform.position == levelManager.CurrentNode.transform.position)
             {
                 jumping = false;
-                currentNode.GetComponent<Node>().Squish();
-                if (lastDirection < NODE_DIRECTION.MAX_DIRECTION)
-                    GetComponent<SpriteRenderer>().sprite = sprites[(int)lastDirection];
+                levelManager.CurrentNode.GetComponent<Node>().Squish();
             }
         }
 
-        idleTimer += Time.deltaTime;
-        if (idleTimer > idleAlarm)
-        {
-            // play idle anim
-            animator.SetBool("Waiting", !animator.GetBool("Waiting"));
-            idleTimer = 0.0f;
-        }
-
-        if (Vector2.Distance(transform.position, currentNode.transform.position) > distanceFromNextRock / 2.0f)
+        // squash/stretch over jump
+        if (Vector2.Distance(transform.position, levelManager.CurrentNode.transform.position) > distanceFromNextRock / 2.0f)
         {
             transform.localScale += new Vector3(scaleAmount, scaleAmount);
         }
