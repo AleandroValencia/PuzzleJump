@@ -2,17 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LevelManager : MonoBehaviour
+public class LevelManager : Scene
 {
-    [SerializeField] Node[] nodes;
+    PlayerController player;
     [Range(0.0f, 100.0f)] [SerializeField] int randomness = 33;
     int numStartingStones = 0;
-    int remainingStones = 0;
-    int gridWidth = 5;
-    int gridHeight = 6;
-    Node currentNode;
-    Node startNode;
-    NODE_DIRECTION lastDirection = NODE_DIRECTION.MAX_DIRECTION;
 
     // Pre-generated levels
     int[,] levels = new int[,] {    {2,0,0,0,0,1,1,1,1,0,1,0,0,1,0,1,1,1,1,0,0,1,0,0,0,0,0,0,0,0 },
@@ -25,20 +19,30 @@ public class LevelManager : MonoBehaviour
                                     {0,1,1,1,0,0,1,0,1,0,2,1,0,1,1,0,1,0,1,0,0,1,1,1,0,0,0,0,0,0 },
                                     {2,0,0,0,0,1,1,0,0,0,1,1,1,0,0,1,1,1,0,0,1,1,0,0,0,1,0,0,0,0 } };
 
+
     void Start()
     {
         //SelectLevel(levelIndex);
+        player = GetComponent<PlayerController>();
         GenerateRandomLevel();
         SetupNodes();
     }
 
-    public Node StartNode { get { return startNode; } }
-    public int RemainingStones { get { return remainingStones; } }
-    public Node CurrentNode { get { return currentNode; } set { currentNode = value; } }
-    public NODE_DIRECTION LastDirection { get { return lastDirection; } set { lastDirection = value; } }
+    public override void Jump(NODE_DIRECTION _dir)
+    {
+        AdjustLink(currentNode);
+        Node previousNode = currentNode;
+        currentNode = currentNode.GetLink(_dir);
+        StartCoroutine(previousNode.GetComponent<Node>().Scatter(OppositeDirection(_dir)));
+        lastDirection = _dir;
+        DecrementRemainingStones();
+    }
 
-    public Vector3 StartNodePosition() { return startNode.transform.position; }
-    public void DecrementRemainingStones() { remainingStones--; }
+    public override void LevelComplete()
+    {
+        GenerateRandomLevel();
+        RestartLevel();
+    }
 
     /// <summary>
     /// Load level _index in the array of pre-generated levels
@@ -123,29 +127,6 @@ public class LevelManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Get the opposite direction of passed in _dir
-    /// </summary>
-    /// <param name="_dir"></param>
-    /// <returns></returns>
-    public NODE_DIRECTION OppositeDirection(NODE_DIRECTION _dir)
-    {
-        switch (_dir)
-        {
-            case NODE_DIRECTION.UP:
-                return NODE_DIRECTION.DOWN;
-            case NODE_DIRECTION.DOWN:
-                return NODE_DIRECTION.UP;
-            case NODE_DIRECTION.LEFT:
-                return NODE_DIRECTION.RIGHT;
-            case NODE_DIRECTION.RIGHT:
-                return NODE_DIRECTION.LEFT;
-            default:
-                break;
-        }
-        return NODE_DIRECTION.MAX_DIRECTION;
-    }
-
-    /// <summary>
     /// Link the nodes adjacent to _node to each other before deactivating _node
     /// </summary>
     /// <param name="_node"></param>
@@ -167,7 +148,7 @@ public class LevelManager : MonoBehaviour
     /// </summary>
     public void GenerateRandomLevel()
     {
-        startNode = nodes[Random.Range(0, nodes.Length)];
+        startNode = currentNode;
         foreach (Node node in nodes)
         {
             node.Activate();
@@ -229,12 +210,13 @@ public class LevelManager : MonoBehaviour
         {
             GenerateRandomLevel();
         }
+        player.ResetPlayerPosition(startNode.transform.position);
     }
 
     /// <summary>
     /// Activate all nodes in level and reset their links to beginning setting
     /// </summary>
-    public void RestartLevel()
+    public override void RestartLevel()
     {
         foreach (Node node in nodes)
         {

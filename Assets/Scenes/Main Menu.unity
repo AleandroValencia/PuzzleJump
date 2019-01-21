@@ -677,6 +677,28 @@ Prefab:
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 97d3f7f06c718c14aa9aa69359069e18, type: 2}
   m_IsPrefabAsset: 0
+--- !u!1 &1642028434 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1188995962325178, guid: 3002816279c7f0247a32e81394f6ca22,
+    type: 2}
+  m_PrefabInternal: {fileID: 1920367224}
+--- !u!114 &1642028445
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1642028434}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1fcf87f7501507148a29a1a711559d66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  nodes:
+  - {fileID: 1116100222}
+  - {fileID: 469403166}
+  gridWidth: 1
+  gridHeight: 2
+  startNode: {fileID: 1116100222}
 --- !u!1001 &1738829456
 Prefab:
   m_ObjectHideFlags: 0
@@ -1104,7 +1126,38 @@ Prefab:
       propertyPath: nodes.Array.data[1]
       value: 
       objectReference: {fileID: 469403166}
-    m_RemovedComponents: []
+    - target: {fileID: 114492787196177378, guid: 3002816279c7f0247a32e81394f6ca22,
+        type: 2}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114492787196177378, guid: 3002816279c7f0247a32e81394f6ca22,
+        type: 2}
+      propertyPath: gridWidth
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114492787196177378, guid: 3002816279c7f0247a32e81394f6ca22,
+        type: 2}
+      propertyPath: gridHeight
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 114492787196177378, guid: 3002816279c7f0247a32e81394f6ca22,
+        type: 2}
+      propertyPath: randomness
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114492787196177378, guid: 3002816279c7f0247a32e81394f6ca22,
+        type: 2}
+      propertyPath: generateLevelAtStartup
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114492787196177378, guid: 3002816279c7f0247a32e81394f6ca22,
+        type: 2}
+      propertyPath: startNode
+      value: 
+      objectReference: {fileID: 1116100222}
+    m_RemovedComponents:
+    - {fileID: 114492787196177378, guid: 3002816279c7f0247a32e81394f6ca22, type: 2}
   m_SourcePrefab: {fileID: 100100000, guid: 3002816279c7f0247a32e81394f6ca22, type: 2}
   m_IsPrefabAsset: 0
 --- !u!1001 &1997487908

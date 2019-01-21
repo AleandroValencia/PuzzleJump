@@ -9,10 +9,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float touchHoldTimer = 1.5f;
     [SerializeField] float doubleTapSensitivity = 0.7f;
 
-    LevelManager levelManager;
+    Scene levelManager;
     SoundManager sfx;
     AnimationScript animationController;
-    int levelIndex = 0;
     bool jumping = false;
     bool touchHold = false;
     float touchTimer = 0.0f;
@@ -21,6 +20,11 @@ public class PlayerController : MonoBehaviour
     float scaleAmount = 0.1f;
 
     private Vector2 touchOrigin = -Vector2.one; //Used to store location of screen touch origin for mobile controls.
+
+    public void ResetPlayerPosition(Vector3 _pos)
+    {
+        transform.SetPositionAndRotation(_pos, transform.rotation);
+    }
 
     /// <summary>
     /// Move player to the node in the specified _dir
@@ -31,12 +35,7 @@ public class PlayerController : MonoBehaviour
     {
         if (levelManager.CurrentNode.GetLink(_dir) != null && levelManager.CurrentNode.GetLink(_dir).gameObject.activeSelf)
         {
-            levelManager.AdjustLink(levelManager.CurrentNode);
-            Node previousNode = levelManager.CurrentNode;
-            levelManager.CurrentNode = levelManager.CurrentNode.GetLink(_dir);
-            StartCoroutine(previousNode.GetComponent<Node>().Scatter(levelManager.OppositeDirection(_dir)));
-            levelManager.LastDirection = _dir;
-            levelManager.DecrementRemainingStones();
+            levelManager.Jump(_dir);
 
             sfx.PlaySoundRandomPitch(SoundManager.SOUNDS.JUMP);
             jumping = true;
@@ -178,8 +177,9 @@ public class PlayerController : MonoBehaviour
     {
         sfx = GetComponent<SoundManager>();
         animationController = GetComponent<AnimationScript>();
-        levelManager = GetComponent<LevelManager>();
-        transform.SetPositionAndRotation(levelManager.StartNodePosition(), transform.rotation);
+        levelManager = GetComponent<Scene>();
+        if (levelManager.StartNodePosition() != null)
+            transform.SetPositionAndRotation(levelManager.StartNodePosition(), transform.rotation);
     }
 
     // Update is called once per frame
@@ -190,10 +190,7 @@ public class PlayerController : MonoBehaviour
             // Level Complete
             if (levelManager.RemainingStones == 1)
             {
-                levelIndex++;
-                //SelectLevel(levelIndex);
-                levelManager.GenerateRandomLevel();
-                levelManager.RestartLevel();
+                levelManager.LevelComplete();
                 sfx.PlaySound(SoundManager.SOUNDS.VICTORY);
             }
             animationController.Jump(false);

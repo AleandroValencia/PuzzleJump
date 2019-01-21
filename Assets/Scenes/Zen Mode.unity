@@ -574,6 +574,11 @@ Prefab:
       propertyPath: nodes.Array.data[29]
       value: 
       objectReference: {fileID: 733345934}
+    - target: {fileID: 114492787196177378, guid: 3002816279c7f0247a32e81394f6ca22,
+        type: 2}
+      propertyPath: startNode
+      value: 
+      objectReference: {fileID: 537466626}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3002816279c7f0247a32e81394f6ca22, type: 2}
   m_IsPrefabAsset: 0
