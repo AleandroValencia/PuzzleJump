@@ -125,15 +125,17 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// Activate all nodes in level and reset their linkes to beginning setting
+    /// Activate all nodes in level and reset their links to beginning setting
     /// </summary>
     void RestartLevel()
     {
         foreach (Node node in nodes)
         {
+            node.StopScattering();
             if (node.activeAtStart)
             {
                 node.gameObject.SetActive(true);
+                node.ResetPosition();
             }
         }
         SetupNodes();   // reset links
@@ -170,8 +172,8 @@ public class PlayerController : MonoBehaviour
             AdjustLink(currentNode);
             Node previousNode = currentNode;
             currentNode = currentNode.GetLink(_dir);
-            previousNode.gameObject.SetActive(false);
-            //StartCoroutine(previousNode.GetComponent<Node>().Scatter(OppositeDirection(_dir)));
+            //previousNode.gameObject.SetActive(false);
+            StartCoroutine(previousNode.GetComponent<Node>().Scatter(OppositeDirection(_dir)));
             lastDirection = _dir;
             remainingStones--;
 
