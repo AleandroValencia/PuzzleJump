@@ -92,44 +92,27 @@ public class LevelManager : MonoBehaviour
     {
         numStartingStones = 0;
         remainingStones = 0;
-        // TODO: OPTIMIZE
         for (int i = 0; i < nodes.Length; ++i)
         {
             if (nodes[i].StartedActive())
             {
-                // set up link
+                // set vertical links
                 for (int j = i - gridWidth; j >= 0; j -= gridWidth)
                 {
                     if (nodes[j].gameObject.activeSelf)
                     {
                         nodes[i].SetLink(NODE_DIRECTION.UP, nodes[j]);
+                        nodes[j].SetLink(NODE_DIRECTION.DOWN, nodes[i]);
                         break;
                     }
                 }
-                // set down link
-                for (int j = i + gridWidth; j < gridHeight * gridWidth; j += gridWidth)
-                {
-                    if (nodes[j].gameObject.activeSelf)
-                    {
-                        nodes[i].SetLink(NODE_DIRECTION.DOWN, nodes[j]);
-                        break;
-                    }
-                }
-                // Set left link
+                // Set horizontal links
                 for (int j = i - 1; j >= (i / gridWidth) * gridWidth; --j)
                 {
                     if (nodes[j].gameObject.activeSelf)
                     {
                         nodes[i].SetLink(NODE_DIRECTION.LEFT, nodes[j]);
-                        break;
-                    }
-                }
-                // set right link
-                for (int j = i + 1; j < (i / gridWidth + 1) * gridWidth; ++j)
-                {
-                    if (nodes[j].gameObject.activeSelf)
-                    {
-                        nodes[i].SetLink(NODE_DIRECTION.RIGHT, nodes[j]);
+                        nodes[j].SetLink(NODE_DIRECTION.RIGHT, nodes[i]);
                         break;
                     }
                 }
@@ -228,10 +211,12 @@ public class LevelManager : MonoBehaviour
                                 (currentNode.GetLink(NODE_DIRECTION.RIGHT) != null && lastDirection != OppositeDirection(NODE_DIRECTION.RIGHT));
         }
 
+        // Turn off all nodes that aren't in the new level and weren't randomly turned off
         foreach (Node node in nodes)
         {
             node.Deactivate();
         }
+        // Turn on all nodes in the new level
         foreach (Node node in newLevel)
         {
             node.Activate();
