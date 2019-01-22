@@ -22,6 +22,14 @@ public class PlayerController : MonoBehaviour
 
     private Vector2 touchOrigin = -Vector2.one; //Used to store location of screen touch origin for mobile controls.
 
+    // Use this for initialization
+    void Start()
+    {
+        sfx = GetComponent<SoundManager>();
+        animationController = GetComponent<AnimationScript>();
+        levelManager = GetComponent<Scene>();
+    }
+
     public void ResetPlayerPosition(Vector3 _pos)
     {
         transform.SetPositionAndRotation(_pos, transform.rotation);
@@ -47,8 +55,9 @@ public class PlayerController : MonoBehaviour
             }
             yield return null;
         }
-        jumping = true;
+        jumping = false;
         resetting = false;
+        animationController.StopShoryuken();
     }
 
     /// <summary>
@@ -197,16 +206,6 @@ public class PlayerController : MonoBehaviour
         TouchTimers();
     }
 
-    // Use this for initialization
-    void Start()
-    {
-        sfx = GetComponent<SoundManager>();
-        animationController = GetComponent<AnimationScript>();
-        levelManager = GetComponent<Scene>();
-        if (levelManager.StartNodePosition() != null)
-            transform.SetPositionAndRotation(levelManager.StartNodePosition(), transform.rotation);
-    }
-
     // Update is called once per frame
     void Update()
     {
@@ -215,6 +214,9 @@ public class PlayerController : MonoBehaviour
             // Level Complete
             if (levelManager.RemainingStones == 1)
             {
+                //if (!animationController.IsShoryuken)
+                //    StartCoroutine(animationController.ShoryukenBounce());
+                animationController.Shoryuken();
                 StartCoroutine(levelManager.LevelComplete());
             }
             animationController.Jump(false);

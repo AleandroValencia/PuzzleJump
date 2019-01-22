@@ -30,9 +30,17 @@ public class Node : MonoBehaviour
     public bool Moving { get { return moving; } }
     public Vector3 StartPosition { get { return startPos; } }
 
-    private void Start()
+    private void Awake()
     {
+        if (gameObject.activeSelf)
+        {
+            activeAtStart = true;
+        }
+        renderer = GetComponent<SpriteRenderer>();
         animator = GetComponent<Animator>();
+        spriteIndex = Random.Range(0, 3);
+        renderer.sprite = sprites[spriteIndex];
+        startPos = transform.position;
     }
 
     public void SetLink(NODE_DIRECTION _dir, Node _nodeLink)
@@ -151,17 +159,5 @@ public class Node : MonoBehaviour
             gameObject.SetActive(false);
         animator.SetBool("Flying", false);
         renderer.sprite = sprites[spriteIndex];
-    }
-
-    private void Awake()
-    {
-        if (gameObject.activeSelf)
-        {
-            activeAtStart = true;
-        }
-        renderer = GetComponent<SpriteRenderer>();
-        spriteIndex = Random.Range(0, 3);
-        renderer.sprite = sprites[spriteIndex];
-        startPos = transform.position;
     }
 }

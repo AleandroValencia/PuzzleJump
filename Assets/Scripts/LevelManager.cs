@@ -28,6 +28,7 @@ public class LevelManager : Scene
         sfx = GetComponent<SoundManager>();
         GenerateRandomLevel();
         SetupNodes();
+        StartCoroutine(player.JumpToPosition(startNode.StartPosition));
     }
 
     public override void Jump(NODE_DIRECTION _dir)
@@ -152,7 +153,8 @@ public class LevelManager : Scene
     /// </summary>
     public void GenerateRandomLevel()
     {
-        startNode = currentNode;
+        //startNode = currentNode;
+        startNode = nodes[Random.Range(0, nodes.Length)];
         foreach (Node node in nodes)
         {
             node.Activate();
@@ -214,7 +216,7 @@ public class LevelManager : Scene
         {
             GenerateRandomLevel();
         }
-        player.ResetPlayerPosition(startNode.transform.position);
+        //player.ResetPlayerPosition(startNode.transform.position);
     }
 
     /// <summary>

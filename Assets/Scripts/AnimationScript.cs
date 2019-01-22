@@ -7,17 +7,40 @@ public class AnimationScript : MonoBehaviour {
     [SerializeField] float idleAlarm = 3.0f;
     [SerializeField] float jumpSpeed = 3.0f;
     [SerializeField] float jumpAcceleration = 0.1f;
+    [SerializeField] float shoryukenHeight = 2.0f;
+    [SerializeField] float shoryukenSpeed = 1.0f;
 
     Animator animator;
     float idleTimer = 0.0f;
     bool onScreen = true;
+    bool shoryuken = false;
     public bool OnScreen { get { return onScreen; } }
+    public bool IsShoryuken { get { return shoryuken; } }
 
     // Use this for initialization
     void Start () {
         animator = GetComponent<Animator>();
 	}
 	
+    public IEnumerator ShoryukenBounce()
+    {
+        shoryuken = true;
+        Shoryuken();
+        float yPos = transform.position.y;
+        while(transform.position.y < yPos + shoryukenHeight)
+        {
+            transform.position += new Vector3(0.0f, shoryukenSpeed * Time.deltaTime);
+            yield return null;
+        }
+        while(transform.position.y > yPos)
+        {
+            transform.position -= new Vector3(0.0f, shoryukenSpeed * Time.deltaTime);
+            yield return null;
+        }
+        StopShoryuken();
+        shoryuken = false;
+    }
+
     public IEnumerator JumpOffscreen()
     {
         onScreen = Mathf.Abs(transform.position.y - 1.0f) < Camera.main.orthographicSize && Mathf.Abs(transform.position.x) < Camera.main.orthographicSize * (10.0f / 16.0f);
