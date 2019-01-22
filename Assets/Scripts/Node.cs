@@ -19,6 +19,8 @@ public class Node : MonoBehaviour
     [SerializeField] Sprite[] sprites;
     [SerializeField] float scatterSpeed = 0.2f;
     [SerializeField] float scatterAcceleration = 1.0f;
+    [SerializeField] float flyInSpeed = 0.2f;
+    [SerializeField] bool mainMenu = false;
     Vector3 startPos;
     SpriteRenderer renderer;
     Animator animator;
@@ -41,6 +43,8 @@ public class Node : MonoBehaviour
         spriteIndex = Random.Range(0, 3);
         renderer.sprite = sprites[spriteIndex];
         startPos = transform.position;
+        if (!mainMenu)
+            transform.position += new Vector3(0.0f, Random.Range(-5.0f, -10.0f));
     }
 
     public void SetLink(NODE_DIRECTION _dir, Node _nodeLink)
@@ -70,12 +74,12 @@ public class Node : MonoBehaviour
         animator.SetBool("Flying", true);
         while(transform.position != startPos)
         {
-            transform.position = Vector3.MoveTowards(transform.position, startPos, 0.2f);
+            transform.position = Vector3.MoveTowards(transform.position, startPos, flyInSpeed);
             yield return null;
         }
         animator.SetBool("Flying", false);
         transform.up = new Vector3(0.0f, 1.0f);
-        moving = true;
+        moving = false;
     }
 
     private bool RandomBool()

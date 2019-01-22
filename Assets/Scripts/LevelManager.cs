@@ -27,6 +27,10 @@ public class LevelManager : Scene
         player = GetComponent<PlayerController>();
         sfx = GetComponent<SoundManager>();
         GenerateRandomLevel();
+        foreach (Node node in nodes)
+        {
+            StartCoroutine(node.FlyToPosition());
+        }
         SetupNodes();
         StartCoroutine(player.JumpToPosition(startNode.StartPosition));
     }
@@ -230,7 +234,6 @@ public class LevelManager : Scene
             if (node.activeAtStart)
             {
                 node.gameObject.SetActive(true);
-                //node.ResetPosition();
                 StartCoroutine(node.FlyToPosition());
             }
         }
