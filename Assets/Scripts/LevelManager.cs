@@ -228,11 +228,13 @@ public class LevelManager : Scene
             if (node.activeAtStart)
             {
                 node.gameObject.SetActive(true);
-                node.ResetPosition();
+                //node.ResetPosition();
+                StartCoroutine(node.FlyToPosition());
             }
         }
         SetupNodes();   // reset links
-        transform.SetPositionAndRotation(startNode.transform.position, transform.rotation);
+        //transform.SetPositionAndRotation(startNode.transform.position, transform.rotation);
+        StartCoroutine(player.JumpToPosition(startNode.StartPosition));
         currentNode = startNode;
         lastDirection = NODE_DIRECTION.MAX_DIRECTION;
     }

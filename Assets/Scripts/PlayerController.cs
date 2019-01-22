@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
     Scene levelManager;
     SoundManager sfx;
     AnimationScript animationController;
+    bool resetting = false;
     bool jumping = false;
     bool touchHold = false;
     float touchTimer = 0.0f;
@@ -24,6 +25,30 @@ public class PlayerController : MonoBehaviour
     public void ResetPlayerPosition(Vector3 _pos)
     {
         transform.SetPositionAndRotation(_pos, transform.rotation);
+    }
+
+    public IEnumerator JumpToPosition(Vector3 _pos)
+    {
+        resetting = true;
+        jumping = true;
+        distanceFromNextRock = Vector2.Distance(transform.position, _pos);
+        while (transform.position != _pos)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, _pos, 0.1f);
+            // squash/stretch over jump
+            if (Vector2.Distance(transform.position, _pos) > distanceFromNextRock / 2.0f)
+            {
+                transform.localScale += new Vector3(scaleAmount, scaleAmount);
+            }
+            else
+            {
+                if (transform.localScale.x > 1.0f)
+                    transform.localScale -= new Vector3(scaleAmount, scaleAmount);
+            }
+            yield return null;
+        }
+        jumping = true;
+        resetting = false;
     }
 
     /// <summary>
@@ -199,22 +224,25 @@ public class PlayerController : MonoBehaviour
         else
         {
             animationController.Jump(true);
-            transform.position = Vector3.MoveTowards(transform.position, levelManager.CurrentNode.transform.position, jumpSpeed);
-            if (transform.position == levelManager.CurrentNode.transform.position)
+            if (!resetting)
             {
-                jumping = false;
-                levelManager.CurrentNode.GetComponent<Node>().Squish();
-            }
+                transform.position = Vector3.MoveTowards(transform.position, levelManager.CurrentNode.transform.position, jumpSpeed);
+                if (transform.position == levelManager.CurrentNode.transform.position)
+                {
+                    jumping = false;
+                    levelManager.CurrentNode.GetComponent<Node>().Squish();
+                }
 
-            // squash/stretch over jump
-            if (Vector2.Distance(transform.position, levelManager.CurrentNode.transform.position) > distanceFromNextRock / 2.0f)
-            {
-                transform.localScale += new Vector3(scaleAmount, scaleAmount);
-            }
-            else
-            {
-                if (transform.localScale.x > 1.0f)
-                    transform.localScale -= new Vector3(scaleAmount, scaleAmount);
+                // squash/stretch over jump
+                if (Vector2.Distance(transform.position, levelManager.CurrentNode.transform.position) > distanceFromNextRock / 2.0f)
+                {
+                    transform.localScale += new Vector3(scaleAmount, scaleAmount);
+                }
+                else
+                {
+                    if (transform.localScale.x > 1.0f)
+                        transform.localScale -= new Vector3(scaleAmount, scaleAmount);
+                }
             }
         }
     }

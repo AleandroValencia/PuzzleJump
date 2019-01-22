@@ -13,7 +13,6 @@ public enum NODE_DIRECTION
 
 public class Node : MonoBehaviour
 {
-
     // Up, Down, Left, Right
     public Node[] nodeLink = new Node[(int)NODE_DIRECTION.MAX_DIRECTION] { null, null, null, null };
     public bool activeAtStart = false;
@@ -24,9 +23,12 @@ public class Node : MonoBehaviour
     SpriteRenderer renderer;
     Animator animator;
     bool scattering = false;
+    bool moving = false;
     int spriteIndex = 0;
 
     public bool StartedActive() { return activeAtStart; }
+    public bool Moving { get { return moving; } }
+    public Vector3 StartPosition { get { return startPos; } }
 
     private void Start()
     {
@@ -56,11 +58,16 @@ public class Node : MonoBehaviour
 
     public IEnumerator FlyToPosition()
     {
+        moving = true;
+        animator.SetBool("Flying", true);
         while(transform.position != startPos)
         {
             transform.position = Vector3.MoveTowards(transform.position, startPos, 0.2f);
             yield return null;
         }
+        animator.SetBool("Flying", false);
+        transform.up = new Vector3(0.0f, 1.0f);
+        moving = true;
     }
 
     private bool RandomBool()
@@ -139,7 +146,7 @@ public class Node : MonoBehaviour
             yield return null;
         }
 
-        transform.position = startPos;
+        //transform.position = startPos;
         if (scattering)
             gameObject.SetActive(false);
         animator.SetBool("Flying", false);
