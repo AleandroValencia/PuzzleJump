@@ -22,9 +22,17 @@ public class Node : MonoBehaviour
     [SerializeField] float scatterAcceleration = 1.0f;
     Vector3 startPos;
     SpriteRenderer renderer;
+    Animator animator;
     bool scattering = false;
+    int spriteIndex = 0;
 
     public bool StartedActive() { return activeAtStart; }
+
+    private void Start()
+    {
+        animator = GetComponent<Animator>();
+    }
+
     public void SetLink(NODE_DIRECTION _dir, Node _nodeLink)
     {
         nodeLink[(int)_dir] = _nodeLink;
@@ -44,6 +52,15 @@ public class Node : MonoBehaviour
     {
         transform.position = startPos;
         transform.up = new Vector3(0.0f, 1.0f);
+    }
+
+    public IEnumerator FlyToPosition()
+    {
+        while(transform.position != startPos)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, startPos, 0.2f);
+            yield return null;
+        }
     }
 
     private bool RandomBool()
@@ -74,8 +91,8 @@ public class Node : MonoBehaviour
     /// </summary>
     public void Activate()
     {
-        int rand = Random.Range(0, sprites.Length);
-        renderer.sprite = sprites[rand];
+        spriteIndex = Random.Range(0, sprites.Length);
+        renderer.sprite = sprites[spriteIndex];
         activeAtStart = true;
         gameObject.SetActive(true);
     }
@@ -109,6 +126,7 @@ public class Node : MonoBehaviour
                 break;
         }
         scattering = true;
+        animator.SetBool("Flying", true);
 
         while (scattering && Mathf.Abs(transform.position.y) < Camera.main.orthographicSize && Mathf.Abs(transform.position.x) < Camera.main.orthographicSize * (10.0f / 16.0f))
         {
@@ -124,6 +142,8 @@ public class Node : MonoBehaviour
         transform.position = startPos;
         if (scattering)
             gameObject.SetActive(false);
+        animator.SetBool("Flying", false);
+        renderer.sprite = sprites[spriteIndex];
     }
 
     private void Awake()
@@ -133,8 +153,8 @@ public class Node : MonoBehaviour
             activeAtStart = true;
         }
         renderer = GetComponent<SpriteRenderer>();
-        int rand = Random.Range(0, 3);
-        renderer.sprite = sprites[rand];
+        spriteIndex = Random.Range(0, 3);
+        renderer.sprite = sprites[spriteIndex];
         startPos = transform.position;
     }
 }

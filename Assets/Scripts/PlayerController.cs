@@ -190,8 +190,7 @@ public class PlayerController : MonoBehaviour
             // Level Complete
             if (levelManager.RemainingStones == 1)
             {
-                levelManager.LevelComplete();
-                sfx.PlaySound(SoundManager.SOUNDS.VICTORY);
+                StartCoroutine(levelManager.LevelComplete());
             }
             animationController.Jump(false);
             KeyboardInput();
@@ -206,17 +205,17 @@ public class PlayerController : MonoBehaviour
                 jumping = false;
                 levelManager.CurrentNode.GetComponent<Node>().Squish();
             }
-        }
 
-        // squash/stretch over jump
-        if (Vector2.Distance(transform.position, levelManager.CurrentNode.transform.position) > distanceFromNextRock / 2.0f)
-        {
-            transform.localScale += new Vector3(scaleAmount, scaleAmount);
-        }
-        else
-        {
-            if (transform.localScale.x > 1.0f)
-                transform.localScale -= new Vector3(scaleAmount, scaleAmount);
+            // squash/stretch over jump
+            if (Vector2.Distance(transform.position, levelManager.CurrentNode.transform.position) > distanceFromNextRock / 2.0f)
+            {
+                transform.localScale += new Vector3(scaleAmount, scaleAmount);
+            }
+            else
+            {
+                if (transform.localScale.x > 1.0f)
+                    transform.localScale -= new Vector3(scaleAmount, scaleAmount);
+            }
         }
     }
 }

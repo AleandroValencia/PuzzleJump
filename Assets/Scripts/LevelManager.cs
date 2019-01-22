@@ -5,6 +5,7 @@ using UnityEngine;
 public class LevelManager : Scene
 {
     PlayerController player;
+    SoundManager sfx;
     [Range(0.0f, 100.0f)] [SerializeField] int randomness = 33;
     int numStartingStones = 0;
 
@@ -24,6 +25,7 @@ public class LevelManager : Scene
     {
         //SelectLevel(levelIndex);
         player = GetComponent<PlayerController>();
+        sfx = GetComponent<SoundManager>();
         GenerateRandomLevel();
         SetupNodes();
     }
@@ -38,10 +40,12 @@ public class LevelManager : Scene
         DecrementRemainingStones();
     }
 
-    public override void LevelComplete()
+    public override IEnumerator LevelComplete()
     {
+        sfx.PlaySound(SoundManager.SOUNDS.VICTORY);
         GenerateRandomLevel();
         RestartLevel();
+        yield return null;
     }
 
     /// <summary>

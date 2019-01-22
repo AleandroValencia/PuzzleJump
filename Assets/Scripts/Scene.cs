@@ -32,7 +32,7 @@ public abstract class Scene : MonoBehaviour
 
     public abstract void Jump(NODE_DIRECTION _dir);
     public abstract void RestartLevel();
-    public abstract void LevelComplete();
+    public abstract IEnumerator LevelComplete();
 
     /// <summary>
     /// Get the opposite direction of passed in _dir
